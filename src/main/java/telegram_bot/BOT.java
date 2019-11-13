@@ -1,5 +1,7 @@
 package telegram_bot;
 
+import org.telegram.abilitybots.api.bot.AbilityBot;
+import org.telegram.abilitybots.api.db.DBContext;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -15,10 +17,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import java.io.*;
 import java.util.Properties;
 
-public class BOT extends TelegramLongPollingCommandBot {
+public class BOT extends AbilityBot {
 
     private static final String BOT_USERNAME = "dobeNotes_bot";
-    private static String BOT_TOKEN;
+
+
 
     //        BOT(DefaultBotOptions botOptions) {
 //        super(botOptions, BOT_USERNAME);
@@ -29,35 +32,12 @@ public class BOT extends TelegramLongPollingCommandBot {
 //        register(new InlineKeyBoardCmd());
 //        BOT_TOKEN = getProperties().getProperty("BOT_TOKEN");
 //    }
-    public BOT() {
-        super(BOT_USERNAME);
-        BOT_TOKEN = System.getenv("TOKEN");
+    public BOT(DBContext db) {
+        super(System.getenv("TOKEN"), BOT_USERNAME, db);
     }
 
     @Override
-    public void processNonCommandUpdate(Update update) {
-
-        Message message = update.getMessage();
-        SendMessage sendMessage;
-
-        if (message.getText().equals("Hello")) {
-            sendMessage = new SendMessage(message.getChatId(), "Sam ty hello");
-        } else {
-            sendMessage = new SendMessage(message.getChatId(), message.getText());
-        }
-
-        try {
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-
+    public int creatorId() {
+        return 0;
     }
-
-    @Override
-    public String getBotToken() {
-        return BOT_TOKEN;
-    }
-
-
 }
