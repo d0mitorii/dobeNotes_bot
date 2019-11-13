@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
+import org.telegram.telegrambots.meta.generics.BotOptions;
 
 import java.io.*;
 import java.util.Properties;
@@ -34,6 +35,10 @@ public class BOT extends AbilityBot {
 //    }
     public BOT(DBContext db) {
         super(System.getenv("TOKEN"), BOT_USERNAME, db);
+    }
+
+    public BOT(DBContext db, DefaultBotOptions botOptions) {
+        super(System.getenv("TOKEN"), BOT_USERNAME, db, botOptions);
     }
 
     @Override

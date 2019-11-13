@@ -25,7 +25,7 @@ public class Main {
 //            botOptions.setProxyHost("51.158.102.15");
 //            botOptions.setProxyPort(3128);
 //            botOptions.setProxyType(DefaultBotOptions.ProxyType.HTTP);
-//            telegramBotsApi.registerBot(new BOT(botOptions));
+//            telegramBotsApi.registerBot(new BOT(db, botOptions));
             telegramBotsApi.registerBot(new BOT(db));
         } catch (TelegramApiRequestException e) {
             e.printStackTrace();
