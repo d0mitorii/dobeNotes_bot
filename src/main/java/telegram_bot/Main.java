@@ -17,57 +17,41 @@ import java.util.UUID;
 public class Main {
 
     public static void main(String[] arg) {
-        String sep = File.separator;
-        DBContext db = MapDBContext.onlineInstance("." + sep + "src" + sep + "main" + sep + "resources" + sep + "dobeDB");
-        ApiContextInitializer.init();
-        //TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
+//        ApiContextInitializer.init();
+//        TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
 
+
+        DatabaseManager dbManager = new DatabaseManager();
         Integer Id1 = 1;
-        ArrayList<String> notes1 = new ArrayList<>();
         for(int i = 0; i < 10; i++) {
             String note =  "user1note" + i;
-            notes1.add(note);
+            dbManager.addNote(Id1, note);
         }
-
 
         Integer Id2 = 2;
-        ArrayList<String> notes2 = new ArrayList<>();
         for(int i = 0; i < 10; i++) {
             String note =  "user2note" + i;
-            notes2.add(note);
+            dbManager.addNote(Id2, note);
         }
-
 
         Integer Id3 = 3;
-        ArrayList<String> notes3 = new ArrayList<>();
         for(int i = 0; i < 10; i++) {
             String note =  "user3note" + i;
-            notes3.add(note);
+            dbManager.addNote(Id3, note);
         }
 
-        Map<Integer, ArrayList<String>> notesMap = db.getMap("Notes");
-        notesMap.put(Id1, notes1);
-        notesMap.put(Id2, notes2);
-        notesMap.put(Id3, notes3);
-
-        for(Integer userId : notesMap.keySet()) {
-            ArrayList<String> Notes =  notesMap.get(userId);
-            System.out.println(Notes.toString());
+        for(int i = 1; i < 6; i++) {
+            ArrayList<String> notes = dbManager.getUserNotes(i);
+            System.out.println(notes.toString());
         }
 
-        System.out.println("hello");
-
-
-
+//
 //        try {
-////            DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
-////            botOptions.setProxyHost("51.158.102.15");
-////            botOptions.setProxyPort(3128);
-////            botOptions.setProxyType(DefaultBotOptions.ProxyType.HTTP);
-////            telegramBotsApi.registerBot(new BOT(db, botOptions));
-//
-//            telegramBotsApi.registerBot(new BOT(db));
-//
+//            DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
+//            botOptions.setProxyHost("51.158.102.15");
+//            botOptions.setProxyPort(3128);
+//            botOptions.setProxyType(DefaultBotOptions.ProxyType.HTTP);
+//            telegramBotsApi.registerBot(new BOT(botOptions));
 //        } catch (TelegramApiRequestException e) {
 //            e.printStackTrace();
 //        }
