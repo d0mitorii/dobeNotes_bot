@@ -2,7 +2,6 @@ package telegram_bot;
 
 import org.telegram.abilitybots.api.bot.AbilityBot;
 import org.telegram.abilitybots.api.db.DBContext;
-import org.telegram.abilitybots.api.objects.Ability;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -16,17 +15,13 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.meta.generics.BotOptions;
 
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.util.Properties;
-
-import static org.telegram.abilitybots.api.objects.Locality.ALL;
-import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
 
 public class BOT extends AbilityBot {
 
     private static final String BOT_USERNAME = "dobeNotes_bot";
-    private static final DatabaseManager dbManager = new DatabaseManager();
+
 
 
     //        BOT(DefaultBotOptions botOptions) {
@@ -38,25 +33,14 @@ public class BOT extends AbilityBot {
 //        register(new InlineKeyBoardCmd());
 //        BOT_TOKEN = getProperties().getProperty("BOT_TOKEN");
 //    }
-
-    public BOT(DefaultBotOptions botOptions) {
-        super(System.getenv("TOKEN"), BOT_USERNAME, botOptions);
-    }
-    public BOT() {
-
-        super(System.getenv("TOKEN"), BOT_USERNAME);
+    public BOT(DBContext db) {
+        super(System.getenv("TOKEN"), BOT_USERNAME, db);
     }
 
-    public Ability sayHelloWorld() {
-        return Ability
-                .builder()
-                .name("hello")
-                .info("says hello world!")
-                .locality(ALL)
-                .privacy(PUBLIC)
-                .action(ctx -> silent.send("Hello world!", ctx.chatId()))
-                .build();
+    public BOT(DBContext db, DefaultBotOptions botOptions) {
+        super(System.getenv("TOKEN"), BOT_USERNAME, db, botOptions);
     }
+
     @Override
     public int creatorId() {
         return 0;
