@@ -18,8 +18,8 @@ public class DatabaseManager {
         db = MapDBContext.onlineInstance("." + sep + "src" + sep + "main" + sep + "resources" + sep + "dobeDB");
     }
 
-    public void addNote(Integer userID, String note) {
-        Map<Integer, ArrayList<UUID>> notesIdMap = db.getMap("USER_NOTEID_LISTS");
+    public void addNote(Long userID, String note) {
+        Map<Long, ArrayList<UUID>> notesIdMap = db.getMap("USER_NOTEID_LISTS");
         Map<UUID, String> notesMap = db.getMap("NOTES");
         ArrayList<UUID> notesId = notesIdMap.get(userID);
         if (notesId == null) {
@@ -31,8 +31,8 @@ public class DatabaseManager {
         notesMap.put(noteId, note);
     }
 
-    public ArrayList<String> getUserNotes(Integer userID) {
-        Map<Integer, ArrayList<UUID>> notesIdMap = db.getMap("USER_NOTEID_LISTS");
+    public ArrayList<String> getUserNotes(Long userID) {
+        Map<Long, ArrayList<UUID>> notesIdMap = db.getMap("USER_NOTEID_LISTS");
         Map<UUID, String> notesMap = db.getMap("NOTES");
         ArrayList<UUID> notesId = notesIdMap.get(userID);
         if (notesId == null) {
