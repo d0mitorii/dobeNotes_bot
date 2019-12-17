@@ -6,11 +6,7 @@ import org.telegram.abilitybots.api.sender.SilentSender;
 import org.telegram.abilitybots.api.util.AbilityExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
-
-import java.sql.Struct;
 import java.util.function.Predicate;
-
 import static org.telegram.abilitybots.api.objects.Flag.MESSAGE;
 import static org.telegram.abilitybots.api.objects.Flag.REPLY;
 import static org.telegram.abilitybots.api.objects.Locality.ALL;
@@ -23,7 +19,6 @@ public class BotAbilities implements AbilityExtension {
     private final SilentSender silent;
     private final DatabaseManager dbManager;
     private final String BOT_USERNAME;
-    private final String commands = "/addnote - " + addNote().info();
 
     public BotAbilities(MessageSender sender, SilentSender silent, DatabaseManager dbManager, String BOT_USERNAME) {
         this.sender = sender;
@@ -36,7 +31,6 @@ public class BotAbilities implements AbilityExtension {
         return "/" + name.name() + " - " + name.info() + "\n";
     }
 
-
     public Ability start() {
         return Ability.builder()
                 .name("start")
@@ -45,7 +39,11 @@ public class BotAbilities implements AbilityExtension {
                 .locality(ALL)
                 .input(0)
                 .action(ctx -> {
-                    silent.send("Hello", ctx.chatId());
+                    String USER_NAME = ctx.user().getUserName();
+                    if (USER_NAME == null || USER_NAME.isEmpty()) {
+                        USER_NAME = ctx.user().getFirstName() + " " + ctx.user().getLastName();
+                    }
+                    silent.send("Hello, " + USER_NAME, ctx.chatId());
                     silent.send("I am a bot for notes", ctx.chatId());
                     silent.send("Here is my list of commands:\n" +
                             nameAndInfo(addNote()), ctx.chatId());
