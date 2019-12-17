@@ -47,6 +47,8 @@ public class BotAbilities implements AbilityExtension {
                     silent.send("I am a bot for notes", ctx.chatId());
                     silent.send("Here is my list of commands:\n" +
                             nameAndInfo(addNote()), ctx.chatId());
+                    silent.send("They created me:\n@domitorii\n@Bfl4t", ctx.chatId());
+                    silent.send("My heart and brain:\nhttps://github.com/d0mitorii/dobeNotes_bot", ctx.chatId());
                 })
                 .build();
     }
