@@ -55,11 +55,9 @@ public class BotAbilities implements AbilityExtension {
                 .locality(ALL)
                 .input(0)
                 .action(ctx -> {
-                    silent.send("Hello, " + getUSER_NAME(ctx), ctx.chatId());
-                    silent.send("I am a bot for notes", ctx.chatId());
+                    silent.send("Hello, " + getUSER_NAME(ctx) + "!\nI am a bot for notes.", ctx.chatId());
                     silent.send("Here is my list of commands:\n" +
                             nameAndInfo(addNote()), ctx.chatId());
-//                    silent.send("They created me:\n@domitorii\n@Bfl4t", ctx.chatId());
                     silent.execute(addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
                 })
                 .build();
@@ -99,9 +97,10 @@ public class BotAbilities implements AbilityExtension {
         return upd -> upd.getMessage().getReplyToMessage().getFrom().getUserName().equalsIgnoreCase(BOT_USERNAME);
     }
 
-    private InlineKeyboardMarkup InlineKeyboardMarkup = new InlineKeyboardMarkup();
 
     private SendMessage addKeyBoard(String text, MessageContext upd) {
+
+        InlineKeyboardMarkup InlineKeyboardMarkup = new InlineKeyboardMarkup();
         SendMessage sendMessage = new SendMessage();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         List<InlineKeyboardButton> keyboardFirstRow = new ArrayList<>();
