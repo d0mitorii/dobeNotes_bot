@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 
+import java.sql.Struct;
 import java.util.function.Predicate;
 
 import static org.telegram.abilitybots.api.objects.Flag.MESSAGE;
@@ -22,12 +23,34 @@ public class BotAbilities implements AbilityExtension {
     private final SilentSender silent;
     private final DatabaseManager dbManager;
     private final String BOT_USERNAME;
+    private final String commands = "/addnote - " + addNote().info();
 
     public BotAbilities(MessageSender sender, SilentSender silent, DatabaseManager dbManager, String BOT_USERNAME) {
         this.sender = sender;
         this.silent = silent;
         this.dbManager = dbManager;
         this.BOT_USERNAME = BOT_USERNAME;
+    }
+
+    public String nameAndInfo(Ability name) {
+        return "/" + name.name() + " - " + name.info() + "\n";
+    }
+
+
+    public Ability start() {
+        return Ability.builder()
+                .name("start")
+                .info("Startup")
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .input(0)
+                .action(ctx -> {
+                    silent.send("Hello", ctx.chatId());
+                    silent.send("I am a bot for notes", ctx.chatId());
+                    silent.send("Here is my list of commands:\n" +
+                            nameAndInfo(addNote()), ctx.chatId());
+                })
+                .build();
     }
 
     public Ability addNote() {
@@ -51,52 +74,6 @@ public class BotAbilities implements AbilityExtension {
                         isReplyToBot(),
                         isReplyToMessage(replyMessage))
                 .build();
-    }
-    public Ability sayHelloWorld() {
-        return Ability
-                .builder()
-                .name("hello")
-                .info("says hello world!")
-                .locality(ALL)
-                .privacy(PUBLIC)
-                .action(ctx -> silent.send("Hello world 123", ctx.chatId()))
-                .build();
-    }
-
-    public Ability playWithMe() {
-        String playMessage = "Play with me!";
-        return Ability.builder()
-                .name("play123")
-                .info("Do you want to play with me?")
-                .privacy(PUBLIC)
-                .locality(ALL)
-                .input(0)
-                .action(ctx -> silent.forceReply(playMessage, ctx.chatId()))
-// The signature of a reply is -> (Consumer<Update> action, Predicate<Update>... conditions)
-// So, we first declare the action that takes an update (NOT A MESSAGECONTEXT) like the action above
-// The reason of that is that a reply can be so versatile depending on the message, context becomes an inefficient wrapping
-                .reply(upd -> {
-// Sends message
-                            silent.send("It's been nice playing with you!", upd.getMessage().getChatId());
-                        },
-// Now we start declaring conditions, MESSAGE is a member of the enum Flag class
-// That class contains out-of-the-box predicates for your replies!
-// MESSAGE means that execute the reply if it has a message
-                        MESSAGE,
-// REPLY means that the update must be a reply
-                        REPLY,
-// The reply must be to the bot
-                        isReplyToBot(),
-// The reply is to the playMessage
-                        isReplyToMessage(playMessage)
-                )
-// You can add more replies by calling .reply(...)
-                .build();
-
-/*
-The checks are made so that, once you execute your logic there is not need to check for the validity of the reply.
-They were all made once the action logic is being executed.
-*/
     }
 
     private Predicate<Update> isReplyToMessage(String message) {
