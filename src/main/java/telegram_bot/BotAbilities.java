@@ -2,6 +2,7 @@ package telegram_bot;
 
 import org.telegram.abilitybots.api.objects.Ability;
 import org.telegram.abilitybots.api.objects.MessageContext;
+import org.telegram.abilitybots.api.objects.Reply;
 import org.telegram.abilitybots.api.sender.MessageSender;
 import org.telegram.abilitybots.api.sender.SilentSender;
 import org.telegram.abilitybots.api.util.AbilityExtension;
@@ -14,8 +15,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import static org.telegram.abilitybots.api.objects.Flag.MESSAGE;
-import static org.telegram.abilitybots.api.objects.Flag.REPLY;
+
+import static org.telegram.abilitybots.api.objects.Flag.*;
 import static org.telegram.abilitybots.api.objects.Locality.ALL;
 import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
 
@@ -26,7 +27,6 @@ public class BotAbilities implements AbilityExtension {
     private final SilentSender silent;
     private final DatabaseManager dbManager;
     private final String BOT_USERNAME;
-    private final InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
     public BotAbilities(MessageSender sender, SilentSender silent, DatabaseManager dbManager, String BOT_USERNAME) {
         this.sender = sender;
@@ -39,27 +39,41 @@ public class BotAbilities implements AbilityExtension {
         return "/" + name.name() + " - " + name.info() + "\n";
     }
 
-    public String getUSER_NAME(MessageContext upd) {
-        String USER_NAME = upd.user().getUserName();
-        if (USER_NAME == null || USER_NAME.isEmpty()) {
-            USER_NAME = upd.user().getFirstName() + " " + upd.user().getLastName();
-        }
-        return USER_NAME;
-    }
+
 
     public Ability start() {
         return Ability.builder()
                 .name("start")
-                .info("Startup")
+                .info("Displays bot info")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
                 .action(ctx -> {
-                    silent.send("Hello, " + getUSER_NAME(ctx) + "!\nI am a bot for notes.", ctx.chatId());
+                    dbManager.addUserName(ctx);
+                    silent.send("Hello, " +dbManager.getUserName(ctx.chatId()) + "!\nI am a bot for notes.", ctx.chatId());
                     silent.send("Here is my list of commands:\n" +
-                            nameAndInfo(addNote()), ctx.chatId());
-                    silent.execute(addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
+                            nameAndInfo(addNote()) +
+                            nameAndInfo(createFolder()), ctx.chatId());
+                    silent.execute(Keyboards.addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
                 })
+                .build();
+    }
+
+    public Ability createFolder() {
+        return Ability.builder()
+                .name("newfolder")
+                .info("Create new folder")
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .input(0)
+                .action(ctx -> silent.forceReply("Enter folder name", ctx.chatId()))
+                .reply(upd -> {
+                            silent.send(upd.getMessage().getText() + " created", upd.getMessage().getChatId());
+                        },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage("Enter folder name"))
                 .build();
     }
 
@@ -73,17 +87,23 @@ public class BotAbilities implements AbilityExtension {
                 .input(0)
                 .action(ctx -> silent.forceReply(replyMessage, ctx.chatId()))
                 .reply(upd -> {
-                            Long userID = upd.getMessage().getChatId();
-                            Message msg = upd.getMessage();
-                            dbManager.addNote(userID, msg.getText());
-                            silent.send("Note added:\n" + msg.getText(), upd.getMessage().getChatId());
-                            System.out.println(dbManager.getUserNotes(userID));
+                            dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText());
+                            silent.execute(Keyboards.addKeyBoardCallBack(upd.getMessage().getText(), upd));
                         },
                         MESSAGE,
                         REPLY,
                         isReplyToBot(),
                         isReplyToMessage(replyMessage))
                 .build();
+    }
+
+    public Reply editNote() {
+        return Reply.of(upd -> {
+                    silent.send("editing", upd.getCallbackQuery().getMessage().getChatId());
+                },
+                CALLBACK_QUERY,
+                isEditCommand()
+        );
     }
 
     private Predicate<Update> isReplyToMessage(String message) {
@@ -97,25 +117,12 @@ public class BotAbilities implements AbilityExtension {
         return upd -> upd.getMessage().getReplyToMessage().getFrom().getUserName().equalsIgnoreCase(BOT_USERNAME);
     }
 
-
-    private SendMessage addKeyBoard(String text, MessageContext upd) {
-
-        InlineKeyboardMarkup InlineKeyboardMarkup = new InlineKeyboardMarkup();
-        SendMessage sendMessage = new SendMessage();
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        List<InlineKeyboardButton> keyboardFirstRow = new ArrayList<>();
-
-        keyboard.clear();
-        keyboardFirstRow.clear();
-
-        keyboardFirstRow.add(new InlineKeyboardButton("My repositories").setUrl("https://github.com/d0mitorii/dobeNotes_bot"));
-        keyboard.add(keyboardFirstRow);
-        InlineKeyboardMarkup.setKeyboard(keyboard);
-
-        sendMessage.setText(text);
-        sendMessage.setReplyMarkup(InlineKeyboardMarkup);
-        sendMessage.setChatId(upd.chatId());
-        return sendMessage;
+    private Predicate<Update> isEditCommand() {
+        return upd -> upd.getCallbackQuery().getData().contentEquals("edit");
     }
+
+
+
+
 
 }

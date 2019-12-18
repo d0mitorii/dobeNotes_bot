@@ -21,10 +21,6 @@ public class BOT extends AbilityBot {
         return new BotAbilities(sender, silent, dbManager, BOT_USERNAME);
     }
 
-//    public InlineKeyBoard keyBoard() {
-//        return new InlineKeyBoard(System.getenv("TOKEN"), BOT_USERNAME);
-//    }
-
     @Override
     public int creatorId() {
         return 0;
