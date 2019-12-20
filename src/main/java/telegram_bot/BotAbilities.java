@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +56,7 @@ public class BotAbilities implements AbilityExtension {
                             nameAndInfo(addNote()) +
                             nameAndInfo(createFolder()), ctx.chatId());
                     silent.execute(Keyboards.addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
+                    silent.execute(Keyboards.addReplyKeyBoard(ctx));
                 })
                 .build();
     }
@@ -88,7 +90,7 @@ public class BotAbilities implements AbilityExtension {
                 .action(ctx -> silent.forceReply(replyMessage, ctx.chatId()))
                 .reply(upd -> {
                             dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText());
-                            silent.execute(Keyboards.addKeyBoardCallBack(upd.getMessage().getText(), upd));
+                            silent.execute(Keyboards.addKeyBoardCallBack(upd));
                         },
                         MESSAGE,
                         REPLY,
@@ -99,7 +101,7 @@ public class BotAbilities implements AbilityExtension {
 
     public Reply editNote() {
         return Reply.of(upd -> {
-                    silent.send("editing", upd.getCallbackQuery().getMessage().getChatId());
+                silent.send("Editing", upd.getMessage().getChatId());
                 },
                 CALLBACK_QUERY,
                 isEditCommand()
