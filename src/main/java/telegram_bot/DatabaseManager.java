@@ -5,10 +5,7 @@ import org.telegram.abilitybots.api.db.MapDBContext;
 import org.telegram.abilitybots.api.objects.MessageContext;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class DatabaseManager {
 
@@ -20,8 +17,8 @@ public class DatabaseManager {
     }
 
     public void addNote(Long userID, String note) {
-        Map<Long, ArrayList<UUID>> notesIdMap = db.getMap("USER_NOTEID_LISTS");
-        Map<UUID, String> notesMap = db.getMap("NOTES");
+        Map<Long, ArrayList<UUID>> notesIdMap = db.getMap("USERID_TO_NOTEID_ARRAY");
+        Map<UUID, String> notesMap = db.getMap("NOTEID_TO_NOTE");
         ArrayList<UUID> notesId = notesIdMap.get(userID);
         if (notesId == null) {
             notesId = new ArrayList<>();
@@ -38,30 +35,50 @@ public class DatabaseManager {
             userName = msgContext.user().getFirstName() + " " + msgContext.user().getLastName();
         }
         Long userID = msgContext.chatId();
-        Map<Long, String> userNamesMap = db.getMap("USERNAMES");
+        Map<Long, String> userNamesMap = db.getMap("USERID_TO_USERNAME");
         userNamesMap.put(userID, userName);
     }
 
     public String getUserName(Long userID) {
-        Map<Long, String> userNamesMap = db.getMap("USERNAMES");
+        Map<Long, String> userNamesMap = db.getMap("USERID_TO_USERNAME");
         return userNamesMap.get(userID);
     }
 
 
     public ArrayList<String> getUserNotes(Long userID) {
-        Map<Long, ArrayList<UUID>> notesIdMap = db.getMap("USER_NOTEID_LISTS");
-        Map<UUID, String> notesMap = db.getMap("NOTES");
+        Map<Long, ArrayList<UUID>> notesIdMap = db.getMap("USERID_TO_NOTEID_ARRAY");
+        Map<UUID, String> notesMap = db.getMap("NOTEID_TO_NOTE");
         ArrayList<UUID> notesId = notesIdMap.get(userID);
+        System.out.println(notesMap.values());
+
         if (notesId == null) {
-            return new ArrayList<String>(Arrays.asList("empty"));
+            return null;
         }
+
         ArrayList<String> notes = new ArrayList<>();
         for (UUID noteId : notesId) {
             String note = notesMap.get(noteId);
             notes.add(note);
         }
+
         return notes;
     }
 
+    public ArrayList<String> searchUserNotes(Long userID, String searchString) {
+        ArrayList<String> userNotes = getUserNotes(userID);
+        if (userNotes == null) {
+            return null;
+        }
+
+        ArrayList<String> foundNotes = new ArrayList<>();
+
+        for (String note : userNotes) {
+            if (note.contains(searchString)) {
+                foundNotes.add(note);
+            }
+        }
+
+        return foundNotes;
+    }
 }
 
