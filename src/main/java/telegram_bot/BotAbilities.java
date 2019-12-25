@@ -40,7 +40,6 @@ public class BotAbilities implements AbilityExtension {
     }
 
 
-
     public Ability start() {
         return Ability.builder()
                 .name("start")
@@ -53,7 +52,10 @@ public class BotAbilities implements AbilityExtension {
                     silent.send("Hello, " +dbManager.getUserName(ctx.chatId()) + "!\nI am a bot for notes.", ctx.chatId());
                     silent.send("Here is my list of commands:\n" +
                             nameAndInfo(addNote()) +
-                            nameAndInfo(createFolder()), ctx.chatId());
+                            nameAndInfo(createFolder()) +
+                            nameAndInfo(listNotes()) +
+                            nameAndInfo(searchNotes()),
+                            ctx.chatId());
                     silent.execute(Keyboards.addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
                 })
                 .build();
@@ -97,6 +99,58 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
+    public Ability listNotes() {
+        return Ability.builder()
+                .name("list")
+                .info("Lists all of your notes")
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .input(0)
+                .action(ctx ->  {
+                    long userID = ctx.chatId();
+                    ArrayList<String> notes = dbManager.getUserNotes(userID);
+                    if (notes == null) {
+                        silent.send("No notes found", userID);
+                    } else {
+                        silent.send("found " + notes.size() + " notes:", userID);
+                        for (String note : notes) {
+                            silent.send(note, userID);
+                        }
+                    }
+                })
+                .build();
+    }
+
+    public Ability searchNotes() {
+        String replyMessage = "Input what you're searching for";
+        return Ability.builder()
+                .name("search")
+                .info("Searches through your notes")
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .input(0)
+                .action(ctx -> silent.forceReply(replyMessage, ctx.chatId()))
+                .reply(upd -> {
+                            long userID =upd.getMessage().getChatId();
+                            ArrayList<String> foundNotes = dbManager.searchUserNotes(userID, upd.getMessage().getText());
+                            if (foundNotes == null) {
+                                silent.send("No notes found", userID);
+                            } else {
+                                silent.send("found " + foundNotes.size() + " notes:", userID);
+                                for (String note : foundNotes) {
+                                    silent.send(note, userID);
+                                }
+                            }
+                        },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessage))
+                .build();
+    }
+
+
+
     public Reply editNote() {
         return Reply.of(upd -> {
                     silent.send("editing", upd.getCallbackQuery().getMessage().getChatId());
@@ -120,9 +174,5 @@ public class BotAbilities implements AbilityExtension {
     private Predicate<Update> isEditCommand() {
         return upd -> upd.getCallbackQuery().getData().contentEquals("edit");
     }
-
-
-
-
 
 }
