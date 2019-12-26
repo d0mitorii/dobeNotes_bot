@@ -13,12 +13,8 @@ public class BOT extends AbilityBot {
         super(System.getenv("TOKEN"), BOT_USERNAME, botOptions);
     }
 
-    public BOT() {
-        super(System.getenv("TOKEN"), BOT_USERNAME);
-    }
-
     public AbilityExtension botAbilities() {
-        return new BotAbilities(sender, silent, dbManager, BOT_USERNAME);
+        return new BotAbilities(silent, dbManager, BOT_USERNAME);
     }
 
     @Override
