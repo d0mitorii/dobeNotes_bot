@@ -57,7 +57,7 @@ public class BotAbilities implements AbilityExtension {
         List<String> arguments = new ArrayList<>();
         return Ability.builder()
                 .name("addnote")
-                .info("Adds a note")
+                .info("Adds a note.\n  Possible arguments:\n      1) no arguments;\n      2) <Folder Name>;\n      3)<Folder Name>  <Note Name>")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
