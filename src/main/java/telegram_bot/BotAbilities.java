@@ -43,34 +43,14 @@ public class BotAbilities implements AbilityExtension {
                     String text;
                     dbManager.addUserName(ctx);
                     silent.send("Hello, " + dbManager.getUserName(ctx.chatId()) + "!\nI am a bot for notes.", ctx.chatId());
-                    text = "Here is my list of commands:\n" +
+                    silent.send("Here is my list of commands:\n" +
                             nameAndInfo(addNote()) +
-//                            nameAndInfo(createFolder()) +
                             nameAndInfo(searchNotes()) +
-                            nameAndInfo(listNotes());
-                    silent.execute(Keyboards.addReplyKeyBoard(text, ctx));
+                            nameAndInfo(listNotes()), ctx.chatId());
                     silent.execute(Keyboards.addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
                 })
                 .build();
     }
-
-//    public Ability createFolder() {
-//        return Ability.builder()
-//                .name("newfolder")
-//                .info("Create new folder")
-//                .privacy(PUBLIC)
-//                .locality(ALL)
-//                .input(0)
-//                .action(ctx -> silent.forceReply("Enter folder name", ctx.chatId()))
-//                .reply(upd -> {
-//                            silent.send(upd.getMessage().getText() + " created", upd.getMessage().getChatId());
-//                        },
-//                        MESSAGE,
-//                        REPLY,
-//                        isReplyToBot(),
-//                        isReplyToMessage("Enter folder name"))
-//                .build();
-//    }
 
     public Ability addNote() {
         String replyMessage = "Input your note";
