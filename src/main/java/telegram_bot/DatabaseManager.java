@@ -48,6 +48,9 @@ public class DatabaseManager {
     public void addFolder(Long userID, String folder) {
         Map<Long, HashSet<String>> folderMap = db.getMap("USERID_TO_FOLDER_SET");
         HashSet<String> folders = folderMap.get(userID);
+        if (folders == null) {
+            folders = new HashSet<>();
+        }
         folders.add(folder);
         db.commit();
     }
