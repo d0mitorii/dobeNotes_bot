@@ -24,12 +24,12 @@ public class DatabaseManager {
     }
 
     public void addNote(Long userID, String note) {
-        addNote(userID, note, "Misc");
+        String noteName = verifyNoteNameUnambiguity(userID, "untitled");
+        addNote(userID, note, noteName);
     }
 
-    public void addNote(Long userID, String note, String folder) {
-        String noteName = verifyNoteNameUnambiguity(userID, "untitled");
-        addNote(userID, note, folder, noteName);
+    public void addNote(Long userID, String note, String noteName) {
+        addNote(userID, note, "Misc", noteName);
     }
 
     public void addNote(Long userID, String note, String folder, String noteName) {
