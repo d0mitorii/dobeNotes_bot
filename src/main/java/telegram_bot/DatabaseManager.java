@@ -65,7 +65,7 @@ public class DatabaseManager {
         Map<UUID, String> noteNamesMap = db.getMap("NOTEID_TO_NOTENAME");
         String name = noteNamesMap.get(noteID);
         if (name == null) {
-            return "noname";
+            return "noName";
         }
         return name;
     }
