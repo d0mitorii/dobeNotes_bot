@@ -53,9 +53,9 @@ public class BotAbilities implements AbilityExtension {
                     silent.send("Hello, " +dbManager.getUserName(ctx.chatId()) + "!\nI am a bot for notes.", ctx.chatId());
                     silent.send("Here is my list of commands:\n" +
                             nameAndInfo(addNote()) +
-                            nameAndInfo(createFolder()) +
-                            nameAndInfo(listNotes()) +
-                            nameAndInfo(searchNotes()),
+//                            nameAndInfo(createFolder()) +
+                            nameAndInfo(searchNotes()) +
+                            nameAndInfo(listNotes()),
                             ctx.chatId());
                     silent.execute(Keyboards.addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
                     silent.execute(Keyboards.addReplyKeyBoard(ctx));
@@ -63,23 +63,23 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
-    public Ability createFolder() {
-        return Ability.builder()
-                .name("newfolder")
-                .info("Create new folder")
-                .privacy(PUBLIC)
-                .locality(ALL)
-                .input(0)
-                .action(ctx -> silent.forceReply("Enter folder name", ctx.chatId()))
-                .reply(upd -> {
-                            silent.send(upd.getMessage().getText() + " created", upd.getMessage().getChatId());
-                        },
-                        MESSAGE,
-                        REPLY,
-                        isReplyToBot(),
-                        isReplyToMessage("Enter folder name"))
-                .build();
-    }
+//    public Ability createFolder() {
+//        return Ability.builder()
+//                .name("newfolder")
+//                .info("Create new folder")
+//                .privacy(PUBLIC)
+//                .locality(ALL)
+//                .input(0)
+//                .action(ctx -> silent.forceReply("Enter folder name", ctx.chatId()))
+//                .reply(upd -> {
+//                            silent.send(upd.getMessage().getText() + " created", upd.getMessage().getChatId());
+//                        },
+//                        MESSAGE,
+//                        REPLY,
+//                        isReplyToBot(),
+//                        isReplyToMessage("Enter folder name"))
+//                .build();
+//    }
 
     public Ability addNote() {
         String replyMessage = "Input your note";
@@ -92,7 +92,7 @@ public class BotAbilities implements AbilityExtension {
                 .action(ctx -> silent.forceReply(replyMessage, ctx.chatId()))
                 .reply(upd -> {
                             dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText());
-                            silent.execute(Keyboards.addKeyBoardCallBack(upd));
+                            silent.send("Note added:\n" + upd.getMessage().getText(), upd.getMessage().getChatId());
                         },
                         MESSAGE,
                         REPLY,
@@ -151,17 +151,6 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
-
-
-    public Reply editNote() {
-        return Reply.of(upd -> {
-                silent.send("Editing", upd.getMessage().getChatId());
-                },
-                CALLBACK_QUERY,
-                isEditCommand()
-        );
-    }
-
     private Predicate<Update> isReplyToMessage(String message) {
         return upd -> {
             Message reply = upd.getMessage().getReplyToMessage();
@@ -171,10 +160,6 @@ public class BotAbilities implements AbilityExtension {
 
     private Predicate<Update> isReplyToBot() {
         return upd -> upd.getMessage().getReplyToMessage().getFrom().getUserName().equalsIgnoreCase(BOT_USERNAME);
-    }
-
-    private Predicate<Update> isEditCommand() {
-        return upd -> upd.getCallbackQuery().getData().contentEquals("edit");
     }
 
 }

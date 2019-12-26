@@ -42,9 +42,9 @@ public class Keyboards {
         keyboard.add(keyboardFirstRow);
         InlineKeyboardMarkup.setKeyboard(keyboard);
 
-        sendMessage.setText("Note added:\n" + upd.getCallbackQuery().getMessage().getText());
+        sendMessage.setText("Note added:\n" + upd.getMessage().getText());
         sendMessage.setReplyMarkup(InlineKeyboardMarkup);
-        sendMessage.setChatId(upd.getCallbackQuery().getMessage().getChatId());
+        sendMessage.setChatId(upd.getMessage().getChatId());
         return sendMessage;
     }
 
@@ -53,38 +53,37 @@ public class Keyboards {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow keyboardRowFirst = new KeyboardRow();
-        KeyboardRow keyboardRowSecond = new KeyboardRow();
-        keyboardRowFirst.add("Adds a note");
-        keyboardRowFirst.add("Find notes");
-        keyboardRowSecond.add("Create folder");
-        keyboardRowSecond.add("Edit folder");
+        keyboardRowFirst.add("Add");
+        keyboardRowFirst.add("Find");
+        keyboardRowFirst.add("View all");
+
         keyboard.add(keyboardRowFirst);
-        keyboard.add(keyboardRowSecond);
+
         replyKeyboardMarkup.setKeyboard(keyboard);
-        sendMessage.setText("123");
+        sendMessage.setText("Ready");
         sendMessage.setChatId(upd.chatId());
 
         sendMessage.setReplyMarkup(replyKeyboardMarkup.setResizeKeyboard(true));
         return sendMessage;
     }
 
-    public static SendMessage addReplyKeyBoard1(Update upd) {
-        SendMessage sendMessage = new SendMessage();
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow keyboardRowFirst = new KeyboardRow();
-        KeyboardRow keyboardRowSecond = new KeyboardRow();
-        keyboardRowFirst.add("Adds a note");
-        keyboardRowSecond.add("Edit folder");
-        keyboard.add(keyboardRowFirst);
-        keyboard.add(keyboardRowSecond);
-        replyKeyboardMarkup.setKeyboard(keyboard);
-        sendMessage.setText("Editing");
-        sendMessage.setChatId(upd.getCallbackQuery().getMessage().getChatId());
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-        return sendMessage;
-    }
+//    public static SendMessage addReplyKeyBoard1(Update upd) {
+//        SendMessage sendMessage = new SendMessage();
+//        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+//        List<KeyboardRow> keyboard = new ArrayList<>();
+//        KeyboardRow keyboardRowFirst = new KeyboardRow();
+//        KeyboardRow keyboardRowSecond = new KeyboardRow();
+//        keyboardRowFirst.add("Adds a note");
+//        keyboardRowSecond.add("Edit folder");
+//        keyboard.add(keyboardRowFirst);
+//        keyboard.add(keyboardRowSecond);
+//        replyKeyboardMarkup.setKeyboard(keyboard);
+//        sendMessage.setText("Editing");
+//        sendMessage.setChatId(upd.getCallbackQuery().getMessage().getChatId());
+//        replyKeyboardMarkup.setResizeKeyboard(true);
+//        sendMessage.setReplyMarkup(replyKeyboardMarkup);
+//        return sendMessage;
+//    }
 
 
 

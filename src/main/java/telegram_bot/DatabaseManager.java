@@ -71,7 +71,6 @@ public class DatabaseManager {
         }
 
         ArrayList<String> foundNotes = new ArrayList<>();
-
         for (String note : userNotes) {
             if (note.contains(searchString)) {
                 foundNotes.add(note);
