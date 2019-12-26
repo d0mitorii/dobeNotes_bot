@@ -148,7 +148,7 @@ public class DatabaseManager {
         String newName = name;
         int i = 1;
         while (noteNames.contains(newName)) {
-            newName = newName + "(" + i + ")";
+            newName = name + "(" + i + ")";
             i++;
         }
         return newName;
