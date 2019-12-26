@@ -27,6 +27,7 @@ public class DatabaseManager {
         notesId.add(noteId);
         notesIdMap.put(userID, notesId);
         notesMap.put(noteId, note);
+        db.commit();
     }
 
     public void addUserName(MessageContext msgContext) {
@@ -37,6 +38,7 @@ public class DatabaseManager {
         Long userID = msgContext.chatId();
         Map<Long, String> userNamesMap = db.getMap("USERID_TO_USERNAME");
         userNamesMap.put(userID, userName);
+        db.commit();
     }
 
     public String getUserName(Long userID) {
@@ -70,7 +72,7 @@ public class DatabaseManager {
 
         ArrayList<String> foundNotes = new ArrayList<>();
         for (String note : userNotes) {
-            if (note.contains(searchString)) {
+            if (note.toLowerCase().contains(searchString)) {
                 foundNotes.add(note);
             }
         }
