@@ -18,12 +18,12 @@ public class DatabaseManager {
     }
 
     public void addNote(Long userID, String note) {
-        addNote(userID, note, "Misc.", String.valueOf(noteNumber));
+        addNote(userID, note, "Misc", String.valueOf(noteNumber));
         noteNumber++;
     }
 
     public void addNote(Long userID, String note, String noteName) {
-        addNote(userID, note,"Misc.", noteName);
+        addNote(userID, note,"Misc", noteName);
     }
 
     public void addNote(Long userID, String note, String folder, String noteName) {
@@ -103,7 +103,7 @@ public class DatabaseManager {
             String note = notesMap.get(noteId);
             String folder = getFolder(noteId);
             String name = getNoteName(noteId);
-            notes.add(folder + "/" + name + ":\n" + note);
+            notes.add(folder + "\\" + name + ":\n" + note);
         }
 
         return notes;
