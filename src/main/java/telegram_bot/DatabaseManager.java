@@ -26,7 +26,7 @@ public class DatabaseManager {
         addNote(userID, note, noteName, "Misc.");
     }
 
-    public void addNote(Long userID, String note, String noteName, String folder) {
+    public void addNote(Long userID, String note, String folder, String noteName) {
         Map<Long, ArrayList<UUID>> notesIdMap = db.getMap("USERID_TO_NOTEID_ARRAY");
         Map<UUID, String> notesMap = db.getMap("NOTEID_TO_NOTE");
         Map<UUID, String> noteNamesMap = db.getMap("NOTEID_TO_NOTENAME");

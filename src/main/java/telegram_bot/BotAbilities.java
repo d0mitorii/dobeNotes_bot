@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static org.telegram.abilitybots.api.objects.Flag.*;
@@ -73,17 +74,43 @@ public class BotAbilities implements AbilityExtension {
 
     public Ability addNote() {
         String replyMessage = "Input your note";
+        List<String> arguments = new ArrayList<>();
         return Ability.builder()
                 .name("addnote")
                 .info("Adds a note")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
-                .action(ctx -> silent.forceReply(replyMessage, ctx.chatId()))
+                .action(ctx -> {
+                    arguments.clear();
+                    switch (ctx.arguments().length) {
+                        case 1:
+                            arguments.add(ctx.firstArg());
+                            break;
+                        case 2:
+                            arguments.add(ctx.firstArg());
+                            arguments.add(ctx.secondArg());
+                            break;
+                    }
+                    System.out.println(arguments);
+                    silent.forceReply(replyMessage, ctx.chatId());
+                })
                 .reply(upd -> {
+                            System.out.println(arguments.size());
+                            switch (arguments.size()) {
+                                case 0:
+                                    dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText());
+                                    break;
+                                case 1:
+                                    dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText(), arguments.get(0));
+                                    break;
+                                default:
+                                    dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText(), arguments.get(0), arguments.get(1));
+                                    break;
+                            }
                             String text = "Note added:\n" + upd.getMessage().getText();
-                            dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText());
-                            silent.execute(Keyboards.addReplyKeyBoard(text, upd));
+
+                            silent.send(text, upd.getMessage().getChatId());
                         },
                         MESSAGE,
                         REPLY,
