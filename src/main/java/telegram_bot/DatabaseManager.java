@@ -49,8 +49,6 @@ public class DatabaseManager {
         Map<Long, ArrayList<UUID>> notesIdMap = db.getMap("USERID_TO_NOTEID_ARRAY");
         Map<UUID, String> notesMap = db.getMap("NOTEID_TO_NOTE");
         ArrayList<UUID> notesId = notesIdMap.get(userID);
-        System.out.println(notesMap.values());
-
         if (notesId == null) {
             return null;
         }
