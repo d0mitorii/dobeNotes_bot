@@ -19,34 +19,32 @@ public class Keyboards {
         SendMessage sendMessage = new SendMessage();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         List<InlineKeyboardButton> keyboardFirstRow = new ArrayList<>();
-
         keyboardFirstRow.add(new InlineKeyboardButton("My repositories").setUrl("https://github.com/d0mitorii/dobeNotes_bot"));
         keyboard.add(keyboardFirstRow);
         InlineKeyboardMarkup.setKeyboard(keyboard);
-
         sendMessage.setText(text);
         sendMessage.setReplyMarkup(InlineKeyboardMarkup);
         sendMessage.setChatId(upd.chatId());
         return sendMessage;
     }
 
-    public static SendMessage addKeyBoardCallBack(Update upd) {
-        SendMessage sendMessage = new SendMessage();
-        InlineKeyboardMarkup InlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        List<InlineKeyboardButton> keyboardFirstRow = new ArrayList<>();
-
-        keyboardFirstRow.add(new InlineKeyboardButton("Edit").setCallbackData("edit").setSwitchInlineQueryCurrentChat("Jojo"));
-        keyboardFirstRow.add(new InlineKeyboardButton("Delete").setCallbackData("delete"));
-        keyboardFirstRow.add(new InlineKeyboardButton("Change folder").setCallbackData("changeFolder"));
-        keyboard.add(keyboardFirstRow);
-        InlineKeyboardMarkup.setKeyboard(keyboard);
-
-        sendMessage.setText("Note added:\n" + upd.getMessage().getText());
-        sendMessage.setReplyMarkup(InlineKeyboardMarkup);
-        sendMessage.setChatId(upd.getMessage().getChatId());
-        return sendMessage;
-    }
+//    public static SendMessage addKeyBoardCallBack(Update upd) {
+//        SendMessage sendMessage = new SendMessage();
+//        InlineKeyboardMarkup InlineKeyboardMarkup = new InlineKeyboardMarkup();
+//        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+//        List<InlineKeyboardButton> keyboardFirstRow = new ArrayList<>();
+//
+//        keyboardFirstRow.add(new InlineKeyboardButton("Edit").setCallbackData("edit").setSwitchInlineQueryCurrentChat("Jojo"));
+//        keyboardFirstRow.add(new InlineKeyboardButton("Delete").setCallbackData("delete"));
+//        keyboardFirstRow.add(new InlineKeyboardButton("Change folder").setCallbackData("changeFolder"));
+//        keyboard.add(keyboardFirstRow);
+//        InlineKeyboardMarkup.setKeyboard(keyboard);
+//
+//        sendMessage.setText("Note added:\n" + upd.getMessage().getText());
+//        sendMessage.setReplyMarkup(InlineKeyboardMarkup);
+//        sendMessage.setChatId(upd.getMessage().getChatId());
+//        return sendMessage;
+//    }
 
     public static SendMessage addReplyKeyBoard(MessageContext upd) {
         SendMessage sendMessage = new SendMessage();

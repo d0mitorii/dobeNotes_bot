@@ -93,6 +93,7 @@ public class BotAbilities implements AbilityExtension {
                 .reply(upd -> {
                             dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText());
                             silent.send("Note added:\n" + upd.getMessage().getText(), upd.getMessage().getChatId());
+
                         },
                         MESSAGE,
                         REPLY,
