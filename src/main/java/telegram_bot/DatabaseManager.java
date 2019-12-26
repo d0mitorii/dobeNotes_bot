@@ -18,12 +18,12 @@ public class DatabaseManager {
     }
 
     public void addNote(Long userID, String note) {
-        addNote(userID, note, String.valueOf(noteNumber), "Misc.");
+        addNote(userID, note, "Misc.", String.valueOf(noteNumber));
         noteNumber++;
     }
 
     public void addNote(Long userID, String note, String noteName) {
-        addNote(userID, note, noteName, "Misc.");
+        addNote(userID, note,"Misc.", noteName);
     }
 
     public void addNote(Long userID, String note, String folder, String noteName) {
