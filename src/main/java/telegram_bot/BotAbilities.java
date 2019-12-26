@@ -72,11 +72,9 @@ public class BotAbilities implements AbilityExtension {
                             arguments.add(ctx.secondArg());
                             break;
                     }
-                    System.out.println(arguments);
                     silent.forceReply(replyMessage, ctx.chatId());
                 })
                 .reply(upd -> {
-                            System.out.println(arguments.size());
                             switch (arguments.size()) {
                                 case 0:
                                     dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText());
