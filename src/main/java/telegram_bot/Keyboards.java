@@ -46,7 +46,7 @@ public class Keyboards {
 //        return sendMessage;
 //    }
 
-    public static SendMessage addReplyKeyBoard(MessageContext upd) {
+    public static SendMessage addReplyKeyBoard(String text, Object object) {
         SendMessage sendMessage = new SendMessage();
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
@@ -58,9 +58,13 @@ public class Keyboards {
         keyboard.add(keyboardRowFirst);
 
         replyKeyboardMarkup.setKeyboard(keyboard);
-        sendMessage.setText("Ready");
-        sendMessage.setChatId(upd.chatId());
+        sendMessage.setText(text);
 
+        if(object instanceof MessageContext) {
+            sendMessage.setChatId(((MessageContext) object).chatId());
+        } else if (object instanceof Update) {
+            sendMessage.setChatId(((Update) object).getMessage().getChatId());
+        }
         sendMessage.setReplyMarkup(replyKeyboardMarkup.setResizeKeyboard(true));
         return sendMessage;
     }

@@ -1,20 +1,13 @@
 package telegram_bot;
 
 import org.telegram.abilitybots.api.objects.Ability;
-import org.telegram.abilitybots.api.objects.MessageContext;
-import org.telegram.abilitybots.api.objects.Reply;
 import org.telegram.abilitybots.api.sender.MessageSender;
 import org.telegram.abilitybots.api.sender.SilentSender;
 import org.telegram.abilitybots.api.util.AbilityExtension;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Predicate;
 
 import static org.telegram.abilitybots.api.objects.Flag.*;
@@ -29,14 +22,14 @@ public class BotAbilities implements AbilityExtension {
     private final DatabaseManager dbManager;
     private final String BOT_USERNAME;
 
-    public BotAbilities(MessageSender sender, SilentSender silent, DatabaseManager dbManager, String BOT_USERNAME) {
+    BotAbilities(MessageSender sender, SilentSender silent, DatabaseManager dbManager, String BOT_USERNAME) {
         this.sender = sender;
         this.silent = silent;
         this.dbManager = dbManager;
         this.BOT_USERNAME = BOT_USERNAME;
     }
 
-    public String nameAndInfo(Ability name) {
+    private String nameAndInfo(Ability name) {
         return "/" + name.name() + " - " + name.info() + "\n";
     }
 
@@ -49,16 +42,16 @@ public class BotAbilities implements AbilityExtension {
                 .locality(ALL)
                 .input(0)
                 .action(ctx -> {
+                    String text;
                     dbManager.addUserName(ctx);
                     silent.send("Hello, " +dbManager.getUserName(ctx.chatId()) + "!\nI am a bot for notes.", ctx.chatId());
-                    silent.send("Here is my list of commands:\n" +
+                    text = "Here is my list of commands:\n" +
                             nameAndInfo(addNote()) +
 //                            nameAndInfo(createFolder()) +
                             nameAndInfo(searchNotes()) +
-                            nameAndInfo(listNotes()),
-                            ctx.chatId());
+                            nameAndInfo(listNotes());
+                    silent.execute(Keyboards.addReplyKeyBoard(text, ctx));
                     silent.execute(Keyboards.addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
-                    silent.execute(Keyboards.addReplyKeyBoard(ctx));
                 })
                 .build();
     }
@@ -91,9 +84,9 @@ public class BotAbilities implements AbilityExtension {
                 .input(0)
                 .action(ctx -> silent.forceReply(replyMessage, ctx.chatId()))
                 .reply(upd -> {
+                    String text = "Note added:\n" + upd.getMessage().getText();
                             dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText());
-                            silent.send("Note added:\n" + upd.getMessage().getText(), upd.getMessage().getChatId());
-
+                            silent.execute(Keyboards.addReplyKeyBoard(text, upd));
                         },
                         MESSAGE,
                         REPLY,
