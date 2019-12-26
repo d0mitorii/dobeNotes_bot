@@ -88,8 +88,8 @@ public class BotAbilities implements AbilityExtension {
                                     dbManager.addNote(upd.getMessage().getChatId(), upd.getMessage().getText(), arguments.get(0), arguments.get(1));
                                     break;
                             }
-                            String text = "Note added:\n" + upd.getMessage().getText();
 
+                            String text = "Note added:\n" + upd.getMessage().getText();
                             silent.send(text, upd.getMessage().getChatId());
                         },
                         MESSAGE,
