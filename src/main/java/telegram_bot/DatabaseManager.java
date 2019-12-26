@@ -65,7 +65,7 @@ public class DatabaseManager {
         Map<UUID, String> noteToFolderMap = db.getMap(NOTEID_TO_FOLDER);
         String folder = noteToFolderMap.get(noteID);
         if (folder == null) {
-            return "noFolder";
+            return "No folder";
         }
         return folder;
     }
@@ -74,7 +74,7 @@ public class DatabaseManager {
         Map<UUID, String> noteNamesMap = db.getMap(NOTEID_TO_NOTENAME);
         String name = noteNamesMap.get(noteID);
         if (name == null) {
-            return "noName";
+            return "No name";
         }
         return name;
     }

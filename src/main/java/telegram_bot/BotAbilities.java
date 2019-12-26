@@ -57,7 +57,7 @@ public class BotAbilities implements AbilityExtension {
         List<String> arguments = new ArrayList<>();
         return Ability.builder()
                 .name("addnote")
-                .info("Adds a note.\n  Possible arguments:\n      1) no arguments;\n      2) <Folder Name>;\n      3)<Folder Name>  <Note Name>")
+                .info("Adds a note.\n  Possible arguments:\n      1) no arguments;\n      2) <Note Name>;\n      3)<Folder Name>  <Note Name>")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
@@ -110,7 +110,7 @@ public class BotAbilities implements AbilityExtension {
                     if (notes == null) {
                         silent.send("No notes found", userID);
                     } else {
-                        silent.send("found " + notes.size() + " notes:", userID);
+                        silent.send("Found " + notes.size() + " note(s):", userID);
                         for (String note : notes) {
                             silent.send(note, userID);
                         }
@@ -134,7 +134,7 @@ public class BotAbilities implements AbilityExtension {
                             if (foundNotes == null) {
                                 silent.send("No notes found", userID);
                             } else {
-                                silent.send("found " + foundNotes.size() + " notes:", userID);
+                                silent.send("Found " + foundNotes.size() + " note(s):", userID);
                                 for (String note : foundNotes) {
                                     silent.send(note, userID);
                                 }
