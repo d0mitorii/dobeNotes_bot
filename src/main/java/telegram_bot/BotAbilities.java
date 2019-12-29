@@ -40,7 +40,6 @@ public class BotAbilities implements AbilityExtension {
                 .locality(ALL)
                 .input(0)
                 .action(ctx -> {
-                    String text;
 //                    noteManager.addUserName(ctx);
 //                    silent.send("Hello, " + dbManager.getUserName(ctx.chatId()) + "!\nI am a bot for notes.", ctx.chatId());
                     silent.send("Here is my list of commands:\n" +
@@ -56,7 +55,7 @@ public class BotAbilities implements AbilityExtension {
         String replyMessage = "Input your note";
         List<String> arguments = new ArrayList<>();
         return Ability.builder()
-                .name("note")
+                .name("add")
                 .info("Adds a note.\n  Possible arguments:\n      1)no arguments;\n      2)<Note Name>;\n      3)<Folder Name>  <Note Name>")
                 .privacy(PUBLIC)
                 .locality(ALL)
@@ -109,15 +108,31 @@ public class BotAbilities implements AbilityExtension {
                 .locality(ALL)
                 .input(0)
                 .action(ctx -> {
-                    if (ctx.firstArg().equals("folders")) {
-                        //показать папки
-
-                    } else if (ctx.firstArg().equals("notes")) {
+                    if (noteManager.listUserNotes(ctx.chatId()) != null) {
                         for (String note: noteManager.listUserNotes(ctx.chatId())) {
                             silent.send(note, ctx.chatId());
                         }
                     } else {
-                        //ошиб очка
+                        silent.send("You don't have any notes", ctx.chatId());
+                    }
+                })
+                .build();
+    }
+
+    public Ability listFolders() {
+        return Ability.builder()
+                .name("listfolders")
+                .info("View all your folders")
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .input(0)
+                .action(ctx -> {
+                    if (noteManager.listUserNotes(ctx.chatId()) != null) {
+                        for (String folder: noteManager.listUserFolders(ctx.chatId())) {
+                            silent.send(folder, ctx.chatId());
+                        }
+                    } else {
+                        silent.send("You don't have any notes", ctx.chatId());
                     }
                 })
                 .build();
