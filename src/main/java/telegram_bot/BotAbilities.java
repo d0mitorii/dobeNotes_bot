@@ -224,22 +224,21 @@ public class BotAbilities implements AbilityExtension {
         return Ability.builder()
                 .name("editnote")
                 .info("Edit note")
-                .input(1)
+                .input(0)
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .action(ctx -> {
                     silent.forceReply(replyMessage,ctx.chatId());
+
                 })
                 .reply(upd->{
                     noteName[0] = upd.getMessage().getText();
+                    silent.forceReply(replyMessage1, upd.getMessage().getChatId());
                 },
                     MESSAGE,
                     REPLY,
                     isReplyToBot(),
                     isReplyToMessage(replyMessage))
-                .action(ctx -> {
-                    silent.forceReply(replyMessage1, ctx.chatId());
-                })
                 .reply(upd ->{
                     silent.send(noteManager.editNoteContent(noteName[0], upd.getMessage().getText()), upd.getMessage().getChatId());
                 },
