@@ -44,20 +44,20 @@ public class BotAbilities implements AbilityExtension {
 //                    noteManager.addUserName(ctx);
 //                    silent.send("Hello, " + dbManager.getUserName(ctx.chatId()) + "!\nI am a bot for notes.", ctx.chatId());
                     silent.send("Here is my list of commands:\n" +
-                            nameAndInfo(note()) +
-                            nameAndInfo(search()) +
-                            nameAndInfo(list()), ctx.chatId());
+//                            nameAndInfo(note()) +
+//                            nameAndInfo(search()) +
+                            nameAndInfo(listNotes()), ctx.chatId());
                     silent.execute(Keyboards.addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
                 })
                 .build();
     }
 
-    public Ability note() {
+    public Ability addNote() {
         String replyMessage = "Input your note";
         List<String> arguments = new ArrayList<>();
         return Ability.builder()
                 .name("note")
-                .info("<add/edit/delete> <Name Folder> <Name Note>")
+                .info("Adds a note.\n  Possible arguments:\n      1)no arguments;\n      2)<Note Name>;\n      3)<Folder Name>  <Note Name>")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
@@ -65,76 +65,34 @@ public class BotAbilities implements AbilityExtension {
                     arguments.clear();
                     switch (ctx.arguments().length) {
                         case 1:
-                            arguments.add(ctx.firstArg()); //   add/edit/delete
+                            arguments.add(ctx.firstArg());
                             break;
                         case 2:
-                            arguments.add(ctx.firstArg()); //   add/edit/delete
-                            arguments.add(ctx.secondArg()); //   name note
+                            arguments.add(ctx.firstArg());
+                            arguments.add(ctx.secondArg());
                             break;
-                        case 3:
-                            arguments.add(ctx.firstArg()); //   add/edit/delete
-                            arguments.add(ctx.secondArg()); //   name folder
-                            arguments.add(ctx.thirdArg()); //   name note
                     }
                     silent.forceReply(replyMessage, ctx.chatId());
                 })
                 .reply(upd -> {
-                    Long chatID = upd.getMessage().getChatId();
-                    String textNote = upd.getMessage().getText();
-                    switch (arguments.size()) {
-                        case 1:
-                            switch (arguments.get(0)) {
-                                case "add":
+                            Long chatID = upd.getMessage().getChatId();
+                            String textNote = upd.getMessage().getText();
+
+                            switch (arguments.size()) {
+                                case 0:
                                     noteManager.addNote(chatID, textNote);
-                                    silent.send("adding", chatID);
+                                    break;
+                                case 1:
+                                    noteManager.addNote(chatID, textNote, arguments.get(0));
+                                    break;
+                                case 2:
+                                    noteManager.addNote(chatID, textNote, arguments.get(0), arguments.get(1));
                                     break;
                                 default:
                                     silent.send("I don't understand", chatID);
-                                    break;
                             }
-                            break;
-                        case 2:
-                            switch (arguments.get(0)) {
-                                case "add":
-                                    //Добавление заметки с названием заметки
-                                    noteManager.addNote(chatID, textNote, arguments.get(1));
-                                    silent.send("adding", chatID);
-                                    break;
-                                case "edit":
-                                    //Редактирование заметки с названием заметки
-                                    break;
-                                case "delete":
-                                    //Удаление заметки с названием заметки
-                                    break;
-                                default:
-                                    //ошибка или чо-то другое
-                                    break;
-                            }
-                            break;
-                        case 3:
-                            switch (arguments.get(0)) {
-                                case "add":
-                                    //Добавление заметки с названием заметки и папки
-                                    silent.send("adding", chatID);
-                                    noteManager.addNote(chatID, textNote, arguments.get(1), arguments.get(2));
-                                    break;
-                                case "edit":
-                                    //Добавление заметки с названием заметки и папки
-                                    break;
-                                case "delete":
-                                    //Удаление заметки с названием заметки и папки
-                                    break;
-                                default:
-                                    //ошибка или чо-то другое
-                                    break;
-                            }
-                            break;
-                        default:
-                            //ошибка аргументов или чо-то другое
-                            break;
-                    }
-                            String text = "Note added:\n" + upd.getMessage().getText();
-                            silent.send(text, upd.getMessage().getChatId());
+                            String text = "Note added:\n" + textNote;
+                            silent.send(text, chatID);
                         },
                         MESSAGE,
                         REPLY,
@@ -143,10 +101,10 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
-    public Ability list() {
+    public Ability listNotes() {
         return Ability.builder()
-                .name("list")
-                .info("<folders/notes>")
+                .name("listnotes")
+                .info("View all your notes")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
@@ -155,9 +113,7 @@ public class BotAbilities implements AbilityExtension {
                         //показать папки
 
                     } else if (ctx.firstArg().equals("notes")) {
-                        System.out.println("yes");
                         for (String note: noteManager.listUserNotes(ctx.chatId())) {
-                            System.out.println(note);
                             silent.send(note, ctx.chatId());
                         }
                     } else {
@@ -218,8 +174,8 @@ public class BotAbilities implements AbilityExtension {
 
 
     public Ability editNote() {
-        String replyMessage = "Input edit name";
-        String replyMessage1 = "Input content";
+        String replyMessageNoteName = "Input edit name";
+        String replyMessageNewContent = "Input content";
         String[] noteName = new String[1];
         return Ability.builder()
                 .name("editnote")
@@ -228,24 +184,24 @@ public class BotAbilities implements AbilityExtension {
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .action(ctx -> {
-                    silent.forceReply(replyMessage,ctx.chatId());
+                    silent.forceReply(replyMessageNoteName,ctx.chatId());
 
                 })
                 .reply(upd->{
                     noteName[0] = upd.getMessage().getText();
-                    silent.forceReply(replyMessage1, upd.getMessage().getChatId());
+                    silent.forceReply(replyMessageNewContent, upd.getMessage().getChatId());
                 },
                     MESSAGE,
                     REPLY,
                     isReplyToBot(),
-                    isReplyToMessage(replyMessage))
+                    isReplyToMessage(replyMessageNoteName))
                 .reply(upd ->{
                     silent.send(noteManager.editNoteContent(noteName[0], upd.getMessage().getText()), upd.getMessage().getChatId());
                 },
                         MESSAGE,
                         REPLY,
                         isReplyToBot(),
-                        isReplyToMessage(replyMessage1))
+                        isReplyToMessage(replyMessageNewContent))
                 .build();
     }
 
