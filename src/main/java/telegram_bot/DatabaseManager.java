@@ -164,6 +164,12 @@ public class DatabaseManager {
     }
 
 
+    public Set<String> getFolderSet(Long userID) {
+        Map<Long, Set<String>> foldersMap = db.getMap(USERID_TO_FOLDERS);
+        Set<String> folderSet = foldersMap.get(userID);
+        return folderSet;
+    }
+
 
     public Set<AbstractMap.SimpleEntry<String, Set<UUID>>> getFolderSetWithNotes(Long userID) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = new HashSet<>();
