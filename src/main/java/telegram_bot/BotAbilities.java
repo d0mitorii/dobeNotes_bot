@@ -115,8 +115,8 @@ public class BotAbilities implements AbilityExtension {
                             switch (arguments.get(0)) {
                                 case "add":
                                     //Добавление заметки с названием заметки и папки
-                                    noteManager.addNote(chatID, textNote, arguments.get(1), arguments.get(2));
                                     silent.send("adding", chatID);
+                                    noteManager.addNote(chatID, textNote, arguments.get(1), arguments.get(2));
                                     break;
                                 case "edit":
                                     //Добавление заметки с названием заметки и папки
@@ -155,7 +155,11 @@ public class BotAbilities implements AbilityExtension {
                         //показать папки
 
                     } else if (ctx.firstArg().equals("notes")) {
-                        //показать заметки
+                        System.out.println("yes");
+                        for (String note: noteManager.listUserNotes(ctx.chatId())) {
+                            System.out.println(note);
+                            silent.send(note, ctx.chatId());
+                        }
                     } else {
                         //ошиб очка
                     }

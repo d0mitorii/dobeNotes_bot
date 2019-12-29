@@ -12,6 +12,9 @@ public class BOT extends AbilityBot {
     public BOT(DefaultBotOptions botOptions) {
         super(System.getenv("TOKEN"), BOT_USERNAME, botOptions);
     }
+    public BOT() {
+        super(System.getenv("TOKEN"), BOT_USERNAME);
+    }
 
     public AbilityExtension botAbilities() {
         return new BotAbilities(silent, noteManager, BOT_USERNAME);

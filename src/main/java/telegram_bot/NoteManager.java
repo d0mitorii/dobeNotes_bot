@@ -20,20 +20,32 @@ public class NoteManager{
         return dbManager.insertNote(userID, content, folder, verifyNoteNameUnambiguity(userID, noteName));
     }
 
+    public String getNote(String noteName) {
+        UUID noteID = dbManager.getNoteID(noteName);
+        if (noteID == null) {
+            return null;
+        } else {
+            return getNote(noteID);
+        }
+    }
+
+    public String getNote(UUID noteID) {
+        return getFolder(noteID)
+                + "\\"
+                + getNoteName(noteID)
+                + "\n"
+                + getNoteContent(noteID);
+    }
+
     public ArrayList<String> searchUserNotesByName(Long userID, String searchString) {
-        Set<Pair<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
+        Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
         ArrayList<String> foundNotes = new ArrayList<>();
 
-        for (Pair<String, Set<UUID>> folderPair : folderSetWithNotes) {
-            for (UUID noteID : folderPair.second) {
+        for (AbstractMap.SimpleEntry<String, Set<UUID>> folderPair : folderSetWithNotes) {
+            for (UUID noteID : folderPair.getValue()) {
                 String noteName = getNoteName(noteID);
                 if (noteName.toLowerCase().contains(searchString.toLowerCase())) {
-                    String output = getFolder(noteID)
-                            + "\\"
-                            + getNoteName(noteID)
-                            + "\n"
-                            + getNote(noteID);
-                    foundNotes.add(output);
+                    foundNotes.add(getNote(noteID));
                 }
             }
         }
@@ -41,11 +53,25 @@ public class NoteManager{
         return foundNotes;
     }
 
-    public void addUserName(MessageContext msgContext) {
+    public ArrayList<String> listUserNotes(Long userID) {
+        Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
+        ArrayList<String> notes = new ArrayList<>();
+
+        for (AbstractMap.SimpleEntry<String, Set<UUID>> folderPair : folderSetWithNotes) {
+            for (UUID noteID : folderPair.getValue()) {
+                    notes.add(getNote(noteID));
+            }
+        }
+
+        return notes;
     }
 
-    public String getNote(UUID noteID) {
-        String note = dbManager.getNote(noteID);
+    public void addUserName(MessageContext msgContext) {
+        dbManager.addUserName(msgContext);
+    }
+
+    public String getNoteContent(UUID noteID) {
+        String note = dbManager.getNoteContent(noteID);
         if (note == null) {
             return "error: no content";
         }
@@ -70,14 +96,16 @@ public class NoteManager{
 
 
     private String verifyNoteNameUnambiguity(Long userID, String name) {
-        Set<Pair<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
+        Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
+        if (folderSetWithNotes == null) {
+            return name;
+        }
 
         Set<String> noteNames = new HashSet<>();
-        for (Pair<String, Set<UUID>> folderPair : folderSetWithNotes) {
-            for (UUID noteID : folderPair.second) {
+        for (AbstractMap.SimpleEntry<String, Set<UUID>> folderPair : folderSetWithNotes) {
+            for (UUID noteID : folderPair.getValue()) {
                 String noteName = dbManager.getNoteName(noteID);
                 if (noteName != null) {
-
                     noteNames.add(noteName);
                 }
             }

@@ -1,6 +1,7 @@
 package telegram_bot;
 
-import jdk.internal.net.http.common.Pair;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.telegram.abilitybots.api.db.DBContext;
 import org.telegram.abilitybots.api.db.MapDBContext;
 import org.telegram.abilitybots.api.objects.MessageContext;
@@ -12,20 +13,14 @@ import java.util.regex.Pattern;
 
 public class DatabaseManager {
 
-//    private static final String USERID_TO_NOTEID_ARRAY = "USERID_TO_NOTEID_ARRAY";
-//    private static final String NOTEID_TO_NOTE = "NOTEID_TO_NOTE";
-//    private static final String NOTEID_TO_NOTENAME = "NOTEID_TO_NOTENAME";
-//    private static final String NOTEID_TO_FOLDER = "NOTEID_TO_FOLDER";
-//    private static final String USERID_TO_FOLDER_SET = "USERID_TO_FOLDER_SET";
-//    private static final String USERID_TO_USERNAME = "USERID_TO_USERNAME";
 
     private static final String USERID_TO_USERNAME = "USERID_TO_USERNAME";
     private static final String USERID_TO_FOLDERS = "USERID_TO_FOLDERS";
     private static final String USERID_TO_NOTES = "USERID_TO_NOTES";
     private static final String FOLDER_TO_NOTES = "FOLDER_TO_NOTES";
     private static final String NOTE_TO_CONTENT = "NOTE_TO_CONTENT";
-    private static final String NOTE_TO_MESSAGEID = "NOTE_TO_MESSAGEID";
     private static final String NOTE_TO_NOTENAME = "NOTE_TO_NOTENAME";
+    private static final String NOTENAME_TO_NOTEID= "NOTENAME_TO_NOTEID";
     private static final String NOTE_TO_TAGS = "NOTE_TO_TAGS";
     private static final String NOTE_TO_FOLDER = "NOTE_TO_FOLDER";
     private final DBContext db;
@@ -57,7 +52,15 @@ public class DatabaseManager {
 
     public void editNoteName(UUID noteID, String newName) {
         Map<UUID, String> noteNameMap = db.getMap(NOTE_TO_NOTENAME);
+        Map<String, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
+
+        String oldName = noteNameMap.get(noteID);
+        if (oldName != null) {
+            noteIdMap.remove(oldName);
+        }
+
         noteNameMap.put(noteID, newName);
+        noteIdMap.put(newName, noteID);
         db.commit();
     }
 
@@ -65,12 +68,13 @@ public class DatabaseManager {
     public void editNoteFolder(Long userID, UUID noteID, String newFolder) {
         addFolder(userID, newFolder);
 
-        Map<Pair<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
+        Map<AbstractMap.SimpleEntry<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
         Map<UUID, String> noteToFolderMap = db.getMap(NOTE_TO_FOLDER);
 
         String oldFolder = noteToFolderMap.get(noteID);
         if (oldFolder != null) {
-            Pair<Long,String> oldFolderPair = new Pair<>(userID, oldFolder);
+            
+            AbstractMap.SimpleEntry<Long,String> oldFolderPair = new AbstractMap.SimpleEntry<>(userID, oldFolder);
             Set<UUID> oldNoteSet = folderToNotesMap.get(oldFolderPair);
             if (oldNoteSet != null) {
                 oldNoteSet.remove(noteID);
@@ -79,7 +83,7 @@ public class DatabaseManager {
         }
 
         noteToFolderMap.put(noteID, newFolder);
-        Pair<Long,String> folderPair = new Pair<>(userID, newFolder);
+        AbstractMap.SimpleEntry<Long,String> folderPair = new AbstractMap.SimpleEntry<>(userID, newFolder);
         Set<UUID> noteSet = folderToNotesMap.get(folderPair);
         if (noteSet == null) {
             noteSet = new HashSet<>();
@@ -124,7 +128,12 @@ public class DatabaseManager {
 //
 //    }
 
-    public String getNote(UUID noteID) {
+    public UUID getNoteID(String noteName) {
+        Map<String, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
+        return noteIdMap.get(noteName);
+    }
+
+    public String getNoteContent(UUID noteID) {
         Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
         return noteContentMap.get(noteID);
     }
@@ -157,8 +166,8 @@ public class DatabaseManager {
 
 
 
-    public Set<Pair<String, Set<UUID>>> getFolderSetWithNotes(Long userID) {
-        Set<Pair<String, Set<UUID>>> folderSetWithNotes = new HashSet<>();
+    public Set<AbstractMap.SimpleEntry<String, Set<UUID>>> getFolderSetWithNotes(Long userID) {
+        Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = new HashSet<>();
 
         Map<Long, Set<String>> foldersMap = db.getMap(USERID_TO_FOLDERS);
         Set<String> folderSet = foldersMap.get(userID);
@@ -166,11 +175,12 @@ public class DatabaseManager {
             return null;
         }
 
-        Map<Pair<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
+        Map<AbstractMap.SimpleEntry<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
+
         for (String folder : folderSet) {
-            Set<UUID> noteSet = folderToNotesMap.get(folder);
+            Set<UUID> noteSet = folderToNotesMap.get(new AbstractMap.SimpleEntry<>(userID, folder));
             if (noteSet != null) {
-                Pair<String, Set<UUID>> folderWithNotes = new Pair<>(folder, noteSet);
+                AbstractMap.SimpleEntry<String, Set<UUID>> folderWithNotes = new AbstractMap.SimpleEntry<>(folder, noteSet);
                 folderSetWithNotes.add(folderWithNotes);
             }
         }
