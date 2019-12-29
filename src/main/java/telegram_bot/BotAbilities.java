@@ -150,6 +150,17 @@ public class BotAbilities implements AbilityExtension {
                 .action(ctx -> {
                     Long chatID = ctx.chatId();
                     arguments.clear();
+
+                    switch (ctx.arguments().length) {
+                        case 1:
+                            arguments.add(ctx.firstArg()); //имя заметки
+                            break;
+                        case 2:
+                            arguments.add(ctx.firstArg()); // content/notename/tag
+                            arguments.add(ctx.secondArg()); // text
+                            break;
+                    }
+
                     switch (ctx.arguments().length) {
                         case 1:
                             for (String note: noteManager.searchUserNotesByName(chatID, arguments.get(0))) {
