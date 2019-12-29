@@ -260,8 +260,7 @@ public class BotAbilities implements AbilityExtension {
     }
 
     private Ability deleteNote() {
-        String replyMessageOldName = "Input old name note";
-        String replyMessageNewName = "Input new name note";
+        String replyMessage = "Input name note";
         return Ability.builder()
                 .name("deletenote")
                 .info("Delete note")
@@ -269,7 +268,7 @@ public class BotAbilities implements AbilityExtension {
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .action(ctx->{
-                    silent.forceReply(replyMessageOldName, ctx.chatId());
+                    silent.forceReply(replyMessage, ctx.chatId());
                 })
                 .reply(upd->{
                             silent.send(noteManager.deleteNote(upd.getMessage().getText(),upd.getMessage().getChatId()),upd.getMessage().getChatId());
@@ -277,7 +276,7 @@ public class BotAbilities implements AbilityExtension {
                         MESSAGE,
                         REPLY,
                         isReplyToBot(),
-                        isReplyToMessage(replyMessageNewName))
+                        isReplyToMessage(replyMessage))
                 .build();
     }
 
