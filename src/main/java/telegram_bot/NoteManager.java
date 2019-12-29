@@ -46,6 +46,31 @@ public class NoteManager{
         return getNote(noteID);
     }
 
+    public String editNoteName(String noteName, String newName, Long userID) {
+        UUID noteID = dbManager.getNoteID(noteName);
+        if (noteID == null) {
+            return null;
+        }
+        dbManager.editNoteName(noteID, verifyNoteNameUnambiguity(userID, newName));
+        return getNote(noteID);
+    }
+
+    public String editNoteFolder(String noteName, String newFolder, Long userID) {
+        UUID noteID = dbManager.getNoteID(noteName);
+        if (noteID == null) {
+            return null;
+        }
+        dbManager.editNoteFolder(userID, noteID, newFolder);
+        return getNote(noteID);
+    }
+
+//    public String deleteNote(String noteName) {
+//        UUID noteID = dbManager.getNoteID(noteName);
+//        if (noteID == null) {
+//            return null;
+//        }
+//
+//    }
     public ArrayList<String> searchUserNotesByName(Long userID, String searchString) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
         ArrayList<String> foundNotes = new ArrayList<>();
