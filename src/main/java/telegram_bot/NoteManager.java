@@ -72,7 +72,7 @@ public class NoteManager{
         if (dbManager.deleteNote(noteID, userID)) {
             return "note deleted";
         } else {
-            return "error";
+            return null;
         }
     }
 
