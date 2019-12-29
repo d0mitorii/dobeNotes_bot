@@ -216,6 +216,40 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
+
+    public Ability editNote() {
+        String replyMessage = "Input edit name";
+        String replyMessage1 = "Input content";
+        String[] noteName = new String[1];
+        return Ability.builder()
+                .name("editnote")
+                .info("Edit note")
+                .input(1)
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .action(ctx -> {
+                    silent.forceReply(replyMessage,ctx.chatId());
+                })
+                .reply(upd->{
+                    noteName[0] = upd.getMessage().getText();
+                },
+                    MESSAGE,
+                    REPLY,
+                    isReplyToBot(),
+                    isReplyToMessage(replyMessage))
+                .action(ctx -> {
+                    silent.forceReply(replyMessage1, ctx.chatId());
+                })
+                .reply(upd ->{
+                    silent.send(noteManager.editNoteContent(noteName[0], upd.getMessage().getText()), upd.getMessage().getChatId());
+                },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessage1))
+                .build();
+    }
+
     private Predicate<Update> isReplyToMessage(String message) {
         return upd -> {
             Message reply = upd.getMessage().getReplyToMessage();
