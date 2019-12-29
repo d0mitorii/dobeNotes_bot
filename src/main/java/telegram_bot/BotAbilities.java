@@ -249,6 +249,33 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
+    private Ability changeFolder() {
+        String replyMessageOldName = "Input name note";
+        String replyMessageNewName = "Input name new folder";
+        String[] nameNote = new String[1];
+        return Ability.builder()
+                .name("changefolder")
+                .info("Change note's folder")
+                .input(0)
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .action(ctx->{
+                    silent.forceReply(replyMessageOldName, ctx.chatId());
+                })
+                .reply(upd->{
+                            nameNote[0] = upd.getMessage().getText();
+                            silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
+                        },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessageNewName))
+                .reply(upd -> {
+                    silent.send(noteManager.editNoteFolder(nameNote[0], upd.getMessage().getText(), upd.getMessage().getChatId()), upd.getMessage().getChatId());
+                })
+                .build();
+    }
+
     private Predicate<Update> isReplyToMessage(String message) {
         return upd -> {
             Message reply = upd.getMessage().getReplyToMessage();
