@@ -37,19 +37,20 @@ public class DatabaseManager {
     }
 
 
-    public void insertNote(Long userID, String content, String folder, String noteName) {
+    public UUID insertNote(Long userID, String content, String folder, String noteName) {
         UUID noteID = UUID.randomUUID();
         editNoteContent(noteID, content);
         editNoteFolder(userID, noteID, folder);
         editNoteName(noteID, noteName);
         //updateNoteTags(noteID);
         db.commit();
+        return noteID;
     }
 
     public void editNoteContent(UUID noteID, String newContent) {
-        Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
-        noteContentMap.put(noteID, newContent);
-        db.commit();
+            Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
+            noteContentMap.put(noteID, newContent);
+            db.commit();
     }
 
 
