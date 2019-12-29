@@ -192,5 +192,31 @@ public class DatabaseManager {
         return folderSetWithNotes;
     }
 
+    public boolean deleteNote(UUID noteID, Long userID) {
+        Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = getFolderSetWithNotes(userID);
+        String folder = getFolder(noteID);
+        AbstractMap.SimpleEntry<Long, String> folderPair = new AbstractMap.SimpleEntry<>(userID, folder);
+
+        Map<AbstractMap.SimpleEntry<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
+        Set<UUID> noteSet = folderToNotesMap.get(folderPair);
+        noteSet.remove(noteID);
+        folderToNotesMap.put(folderPair, noteSet);
+
+        String noteName = getNoteName(noteID);
+        Map<String, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
+        noteIdMap.remove(noteName);
+
+        Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
+        noteContentMap.remove(noteID);
+
+        Map<UUID, String> noteToFolderMap = db.getMap(NOTE_TO_FOLDER);
+        noteToFolderMap.remove(noteID);
+
+        Map<UUID, String> noteNamesMap = db.getMap(NOTE_TO_NOTENAME);
+        noteNamesMap.remove(noteID);
+
+        db.commit();
+        return true;
+    }
 }
 
