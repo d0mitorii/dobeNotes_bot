@@ -28,27 +28,4 @@ public class Keyboards {
         return sendMessage;
     }
 
-    public static SendMessage addReplyKeyBoard(String text, Object object) {
-        SendMessage sendMessage = new SendMessage();
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow keyboardRowFirst = new KeyboardRow();
-        keyboardRowFirst.add("Add");
-        keyboardRowFirst.add("Find");
-        keyboardRowFirst.add("View all");
-
-        keyboard.add(keyboardRowFirst);
-
-        replyKeyboardMarkup.setKeyboard(keyboard);
-        sendMessage.setText(text);
-
-        if (object instanceof MessageContext) {
-            sendMessage.setChatId(((MessageContext) object).chatId());
-        } else if (object instanceof Update) {
-            sendMessage.setChatId(((Update) object).getMessage().getChatId());
-        }
-        sendMessage.setReplyMarkup(replyKeyboardMarkup.setResizeKeyboard(true));
-        return sendMessage;
-    }
-
 }
