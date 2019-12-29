@@ -259,27 +259,27 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
-//    private Ability deleteNote() {
-//        String replyMessageOldName = "Input old name note";
-//        String replyMessageNewName = "Input new name note";
-//        return Ability.builder()
-//                .name("deletenote")
-//                .info("Delete note")
-//                .input(0)
-//                .privacy(PUBLIC)
-//                .locality(ALL)
-//                .action(ctx->{
-//                    silent.forceReply(replyMessageOldName, ctx.chatId());
-//                })
-//                .reply(upd->{
-//                            silent.send(noteManager)
-//                        },
-//                        MESSAGE,
-//                        REPLY,
-//                        isReplyToBot(),
-//                        isReplyToMessage(replyMessageNewName))
-//                .build();
-//    }
+    private Ability deleteNote() {
+        String replyMessageOldName = "Input old name note";
+        String replyMessageNewName = "Input new name note";
+        return Ability.builder()
+                .name("deletenote")
+                .info("Delete note")
+                .input(0)
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .action(ctx->{
+                    silent.forceReply(replyMessageOldName, ctx.chatId());
+                })
+                .reply(upd->{
+                            silent.send(noteManager.deleteNote(upd.getMessage().getText(),upd.getMessage().getChatId()),upd.getMessage().getChatId());
+                        },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessageNewName))
+                .build();
+    }
 
     private Ability changeFolder() {
         String replyMessageOldName = "Input name note";
