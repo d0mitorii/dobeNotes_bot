@@ -37,6 +37,15 @@ public class NoteManager{
                 + getNoteContent(noteID);
     }
 
+    public String editNoteContent(String noteName, String newContent) {
+        UUID noteID = dbManager.getNoteID(noteName);
+        if (noteID == null) {
+            return null;
+        }
+        dbManager.editNoteContent(noteID,newContent);
+        return getNote(noteID);
+    }
+
     public ArrayList<String> searchUserNotesByName(Long userID, String searchString) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
         ArrayList<String> foundNotes = new ArrayList<>();
