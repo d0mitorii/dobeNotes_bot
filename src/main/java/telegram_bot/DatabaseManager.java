@@ -48,8 +48,6 @@ public class DatabaseManager {
             db.commit();
     }
 
-
-
     public void editNoteName(UUID noteID, String newName) {
         Map<UUID, String> noteNameMap = db.getMap(NOTE_TO_NOTENAME);
         Map<String, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
@@ -105,6 +103,7 @@ public class DatabaseManager {
         foldersMap.put(userID, folderSet);
         db.commit();
     }
+
 
 //
 //    private void updateNoteTags(UUID noteID) {
@@ -186,7 +185,6 @@ public class DatabaseManager {
         }
         return folderSetWithNotes;
     }
-
 
 }
 
