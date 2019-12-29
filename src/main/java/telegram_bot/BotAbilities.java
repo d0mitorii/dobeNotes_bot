@@ -150,6 +150,17 @@ public class BotAbilities implements AbilityExtension {
                 .action(ctx -> {
                     Long chatID = ctx.chatId();
                     arguments.clear();
+
+                    switch (ctx.arguments().length) {
+                        case 1:
+                            arguments.add(ctx.firstArg()); //имя заметки
+                            break;
+                        case 2:
+                            arguments.add(ctx.firstArg()); // content/notename/tag
+                            arguments.add(ctx.secondArg()); // text
+                            break;
+                    }
+
                     switch (ctx.arguments().length) {
                         case 1:
                             for (String note: noteManager.searchUserNotesByName(chatID, arguments.get(0))) {
@@ -202,7 +213,6 @@ public class BotAbilities implements AbilityExtension {
                 .locality(ALL)
                 .action(ctx -> {
                     silent.forceReply(replyMessageNoteName,ctx.chatId());
-
                 })
                 .reply(upd->{
                     noteName[0] = upd.getMessage().getText();
@@ -246,6 +256,28 @@ public class BotAbilities implements AbilityExtension {
                 .reply(upd -> {
                     silent.send(noteManager.editNoteName(nameNote[0], upd.getMessage().getText(), upd.getMessage().getChatId()), upd.getMessage().getChatId());
                 })
+                .build();
+    }
+
+    private Ability deleteNote() {
+        String replyMessageOldName = "Input old name note";
+        String replyMessageNewName = "Input new name note";
+        return Ability.builder()
+                .name("deletenote")
+                .info("Delete note")
+                .input(0)
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .action(ctx->{
+                    silent.forceReply(replyMessageOldName, ctx.chatId());
+                })
+                .reply(upd->{
+                            silent.send(noteManager.deleteNote(upd.getMessage().getText(),upd.getMessage().getChatId()),upd.getMessage().getChatId());
+                        },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessageNewName))
                 .build();
     }
 
