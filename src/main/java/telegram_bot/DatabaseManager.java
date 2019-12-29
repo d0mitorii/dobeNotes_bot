@@ -1,20 +1,33 @@
 package telegram_bot;
 
+import jdk.internal.net.http.common.Pair;
 import org.telegram.abilitybots.api.db.DBContext;
 import org.telegram.abilitybots.api.db.MapDBContext;
 import org.telegram.abilitybots.api.objects.MessageContext;
 
 import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DatabaseManager {
 
-    private static final String USERID_TO_NOTEID_ARRAY = "USERID_TO_NOTEID_ARRAY";
-    private static final String NOTEID_TO_NOTE = "NOTEID_TO_NOTE";
-    private static final String NOTEID_TO_NOTENAME = "NOTEID_TO_NOTENAME";
-    private static final String NOTEID_TO_FOLDER = "NOTEID_TO_FOLDER";
-    private static final String USERID_TO_FOLDER_SET = "USERID_TO_FOLDER_SET";
+//    private static final String USERID_TO_NOTEID_ARRAY = "USERID_TO_NOTEID_ARRAY";
+//    private static final String NOTEID_TO_NOTE = "NOTEID_TO_NOTE";
+//    private static final String NOTEID_TO_NOTENAME = "NOTEID_TO_NOTENAME";
+//    private static final String NOTEID_TO_FOLDER = "NOTEID_TO_FOLDER";
+//    private static final String USERID_TO_FOLDER_SET = "USERID_TO_FOLDER_SET";
+//    private static final String USERID_TO_USERNAME = "USERID_TO_USERNAME";
+
     private static final String USERID_TO_USERNAME = "USERID_TO_USERNAME";
+    private static final String USERID_TO_FOLDERS = "USERID_TO_FOLDERS";
+    private static final String USERID_TO_NOTES = "USERID_TO_NOTES";
+    private static final String FOLDER_TO_NOTES = "FOLDER_TO_NOTES";
+    private static final String NOTE_TO_CONTENT = "NOTE_TO_CONTENT";
+    private static final String NOTE_TO_MESSAGEID = "NOTE_TO_MESSAGEID";
+    private static final String NOTE_TO_NOTENAME = "NOTE_TO_NOTENAME";
+    private static final String NOTE_TO_TAGS = "NOTE_TO_TAGS";
+    private static final String NOTE_TO_FOLDER = "NOTE_TO_FOLDER";
     private final DBContext db;
 
 
@@ -23,60 +36,106 @@ public class DatabaseManager {
         db = MapDBContext.onlineInstance("." + sep + "src" + sep + "main" + sep + "resources" + sep + "dobeDB");
     }
 
-    public void addNote(Long userID, String note) {
-        String noteName = verifyNoteNameUnambiguity(userID, "untitled");
-        addNote(userID, note, noteName);
-    }
 
-    public void addNote(Long userID, String note, String noteName) {
-        addNote(userID, note, "Misc", noteName);
-    }
-
-    public void addNote(Long userID, String note, String folder, String noteName) {
-        Map<Long, ArrayList<UUID>> notesIdMap = db.getMap(USERID_TO_NOTEID_ARRAY);
-        Map<UUID, String> notesMap = db.getMap(NOTEID_TO_NOTE);
-        Map<UUID, String> noteNamesMap = db.getMap(NOTEID_TO_NOTENAME);
-        ArrayList<UUID> notesId = notesIdMap.get(userID);
-        if (notesId == null) {
-            notesId = new ArrayList<>();
-        }
+    public void insertNote(Long userID, String content, String folder, String noteName) {
         UUID noteID = UUID.randomUUID();
-        notesId.add(noteID);
-        notesIdMap.put(userID, notesId);
-        notesMap.put(noteID, note);
-        noteNamesMap.put(noteID, verifyNoteNameUnambiguity(userID, noteName));
-        addFolder(userID, folder);
-        Map<UUID, String> noteToFolderMap = db.getMap(NOTEID_TO_FOLDER);
-        noteToFolderMap.put(noteID, folder);
+        editNoteContent(noteID, content);
+        editNoteFolder(userID, noteID, folder);
+        editNoteName(noteID, noteName);
+        //updateNoteTags(noteID);
         db.commit();
     }
+
+    public void editNoteContent(UUID noteID, String newContent) {
+        Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
+        noteContentMap.put(noteID, newContent);
+        db.commit();
+    }
+
+
+
+    public void editNoteName(UUID noteID, String newName) {
+        Map<UUID, String> noteNameMap = db.getMap(NOTE_TO_NOTENAME);
+        noteNameMap.put(noteID, newName);
+        db.commit();
+    }
+
+
+    public void editNoteFolder(Long userID, UUID noteID, String newFolder) {
+        addFolder(userID, newFolder);
+
+        Map<Pair<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
+        Map<UUID, String> noteToFolderMap = db.getMap(NOTE_TO_FOLDER);
+
+        String oldFolder = noteToFolderMap.get(noteID);
+        if (oldFolder != null) {
+            Pair<Long,String> oldFolderPair = new Pair<>(userID, oldFolder);
+            Set<UUID> oldNoteSet = folderToNotesMap.get(oldFolderPair);
+            if (oldNoteSet != null) {
+                oldNoteSet.remove(noteID);
+                folderToNotesMap.put(oldFolderPair, oldNoteSet);
+            }
+        }
+
+        noteToFolderMap.put(noteID, newFolder);
+        Pair<Long,String> folderPair = new Pair<>(userID, newFolder);
+        Set<UUID> noteSet = folderToNotesMap.get(folderPair);
+        if (noteSet == null) {
+            noteSet = new HashSet<>();
+        }
+        noteSet.add(noteID);
+        folderToNotesMap.put(folderPair, noteSet);
+
+        db.commit();
+    }
+
 
     public void addFolder(Long userID, String folder) {
-        Map<Long, HashSet<String>> folderMap = db.getMap(USERID_TO_FOLDER_SET);
-        HashSet<String> folders = folderMap.get(userID);
-        if (folders == null) {
-            folders = new HashSet<>();
+        Map<Long, Set<String>> foldersMap = db.getMap(USERID_TO_FOLDERS);
+        Set<String> folderSet = foldersMap.get(userID);
+        if (folderSet == null) {
+            folderSet = new HashSet<>();
         }
-        folders.add(folder);
+        folderSet.add(folder);
+        foldersMap.put(userID, folderSet);
         db.commit();
+    }
+
+//
+//    private void updateNoteTags(UUID noteID) {
+//        Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
+//        String
+//    }
+//
+//    public List<String> getTags(String content) {
+//        String[] contentParts = content.split("#");
+//        List<String> tags = new ArrayList<>();
+//        for(String part : contentParts) {
+//            part.replace("[^0-9a-zA-Z]", "");
+//        }
+//        Pattern tagPattern = Pattern.compile("#(\\S+)");
+//        Matcher matcher = tagPattern.matcher(content);
+//        List<String> tags = new ArrayList<String>();
+//        while (matcher.find()) {
+//            tags.add(matcher.group(1));
+//        }
+//        System.out.println(tags);
+//
+//    }
+
+    public String getNote(UUID noteID) {
+        Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
+        return noteContentMap.get(noteID);
     }
 
     public String getFolder(UUID noteID) {
-        Map<UUID, String> noteToFolderMap = db.getMap(NOTEID_TO_FOLDER);
-        String folder = noteToFolderMap.get(noteID);
-        if (folder == null) {
-            return "noFolder";
-        }
-        return folder;
+        Map<UUID, String> noteToFolderMap = db.getMap(NOTE_TO_FOLDER);
+        return noteToFolderMap.get(noteID);
     }
 
     public String getNoteName(UUID noteID) {
-        Map<UUID, String> noteNamesMap = db.getMap(NOTEID_TO_NOTENAME);
-        String name = noteNamesMap.get(noteID);
-        if (name == null) {
-            return "noName";
-        }
-        return name;
+        Map<UUID, String> noteNamesMap = db.getMap(NOTE_TO_NOTENAME);
+        return noteNamesMap.get(noteID);
     }
 
     public void addUserName(MessageContext msgContext) {
@@ -96,62 +155,27 @@ public class DatabaseManager {
     }
 
 
-    public ArrayList<String> getUserNotes(Long userID) {
-        Map<Long, ArrayList<UUID>> notesIdMap = db.getMap(USERID_TO_NOTEID_ARRAY);
-        Map<UUID, String> notesMap = db.getMap(NOTEID_TO_NOTE);
-        ArrayList<UUID> notesId = notesIdMap.get(userID);
-        if (notesId == null) {
+
+    public Set<Pair<String, Set<UUID>>> getFolderSetWithNotes(Long userID) {
+        Set<Pair<String, Set<UUID>>> folderSetWithNotes = new HashSet<>();
+
+        Map<Long, Set<String>> foldersMap = db.getMap(USERID_TO_FOLDERS);
+        Set<String> folderSet = foldersMap.get(userID);
+        if (folderSet == null) {
             return null;
         }
 
-        ArrayList<String> notes = new ArrayList<>();
-        for (UUID noteId : notesId) {
-            String note = notesMap.get(noteId);
-            String folder = getFolder(noteId);
-            String name = getNoteName(noteId);
-            notes.add(folder + "\\" + name + ":\n" + note);
-        }
-
-        return notes;
-    }
-
-    public ArrayList<String> searchUserNotes(Long userID, String searchString) {
-        ArrayList<String> userNotes = getUserNotes(userID);
-
-        if (userNotes == null) {
-            return null;
-        }
-
-        ArrayList<String> foundNotes = new ArrayList<>();
-        for (String note : userNotes) {
-            if (note.toLowerCase().contains(searchString)) {
-                foundNotes.add(note);
+        Map<Pair<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
+        for (String folder : folderSet) {
+            Set<UUID> noteSet = folderToNotesMap.get(folder);
+            if (noteSet != null) {
+                Pair<String, Set<UUID>> folderWithNotes = new Pair<>(folder, noteSet);
+                folderSetWithNotes.add(folderWithNotes);
             }
         }
-
-        return foundNotes;
+        return folderSetWithNotes;
     }
 
-    private String verifyNoteNameUnambiguity(Long userID, String name) {
-        Map<Long, ArrayList<UUID>> notesIdMap = db.getMap(USERID_TO_NOTEID_ARRAY);
-        ArrayList<UUID> noteIdArray = notesIdMap.get(userID);
-        if (noteIdArray == null) {
-            return name;
-        }
-        Map<UUID, String> noteNamesMap = db.getMap(NOTEID_TO_NOTENAME);
-        HashSet<String> noteNames = new HashSet<>();
 
-        for (UUID noteID : noteIdArray) {
-            noteNames.add(noteNamesMap.get(noteID));
-        }
-
-        String newName = name;
-        int i = 1;
-        while (noteNames.contains(newName)) {
-            newName = name + "(" + i + ")";
-            i++;
-        }
-        return newName;
-    }
 }
 
