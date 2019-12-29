@@ -100,6 +100,16 @@ public class NoteManager{
         return notes;
     }
 
+    public ArrayList<String> listUserFolders(Long userID) {
+        Set<String> folderSet = dbManager.getFolderSet(userID);
+        ArrayList<String> folders = new ArrayList<>();
+
+        for(String folder: folderSet) {
+            folders.add(folder);
+        }
+        return folders;
+    }
+
     public void addUserName(MessageContext msgContext) {
         dbManager.addUserName(msgContext);
     }
