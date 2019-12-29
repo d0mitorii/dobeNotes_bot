@@ -18,12 +18,12 @@ import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
 public class BotAbilities implements AbilityExtension {
 
     private final SilentSender silent;
-    private final DatabaseManager dbManager;
+    private final NoteManager noteManager;
     private final String BOT_USERNAME;
 
-    BotAbilities(SilentSender silent, DatabaseManager dbManager, String BOT_USERNAME) {
+    BotAbilities(SilentSender silent, NoteManager noteManager, String BOT_USERNAME) {
         this.silent = silent;
-        this.dbManager = dbManager;
+        this.noteManager = noteManager;
         this.BOT_USERNAME = BOT_USERNAME;
     }
 
@@ -41,8 +41,8 @@ public class BotAbilities implements AbilityExtension {
                 .input(0)
                 .action(ctx -> {
                     String text;
-                    dbManager.addUserName(ctx);
-                    silent.send("Hello, " + dbManager.getUserName(ctx.chatId()) + "!\nI am a bot for notes.", ctx.chatId());
+//                    noteManager.addUserName(ctx);
+//                    silent.send("Hello, " + dbManager.getUserName(ctx.chatId()) + "!\nI am a bot for notes.", ctx.chatId());
                     silent.send("Here is my list of commands:\n" +
                             nameAndInfo(note()) +
                             nameAndInfo(search()) +
@@ -57,7 +57,7 @@ public class BotAbilities implements AbilityExtension {
         List<String> arguments = new ArrayList<>();
         return Ability.builder()
                 .name("note")
-                .info("<add/edit/delete> <Name Note> <Name Folder>")
+                .info("<add/edit/delete> <Name Folder> <Name Note>")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
@@ -73,20 +73,23 @@ public class BotAbilities implements AbilityExtension {
                             break;
                         case 3:
                             arguments.add(ctx.firstArg()); //   add/edit/delete
-                            arguments.add(ctx.secondArg()); //   name note
-                            arguments.add(ctx.thirdArg()); //   name folder
+                            arguments.add(ctx.secondArg()); //   name folder
+                            arguments.add(ctx.thirdArg()); //   name note
                     }
                     silent.forceReply(replyMessage, ctx.chatId());
                 })
                 .reply(upd -> {
+                    Long chatID = upd.getMessage().getChatId();
+                    String textNote = upd.getMessage().getText();
                     switch (arguments.size()) {
                         case 1:
                             switch (arguments.get(0)) {
                                 case "add":
-                                    //Добавление заметки без аругмента
+                                    noteManager.addNote(chatID, textNote);
+                                    silent.send("adding", chatID);
                                     break;
                                 default:
-                                    //Ошибка или чо-то другое
+                                    silent.send("I don't understand", chatID);
                                     break;
                             }
                             break;
@@ -94,9 +97,11 @@ public class BotAbilities implements AbilityExtension {
                             switch (arguments.get(0)) {
                                 case "add":
                                     //Добавление заметки с названием заметки
+                                    noteManager.addNote(chatID, textNote, arguments.get(1));
+                                    silent.send("adding", chatID);
                                     break;
                                 case "edit":
-                                    //Добавление заметки с названием заметки
+                                    //Редактирование заметки с названием заметки
                                     break;
                                 case "delete":
                                     //Удаление заметки с названием заметки
@@ -110,6 +115,8 @@ public class BotAbilities implements AbilityExtension {
                             switch (arguments.get(0)) {
                                 case "add":
                                     //Добавление заметки с названием заметки и папки
+                                    noteManager.addNote(chatID, textNote, arguments.get(1), arguments.get(2));
+                                    silent.send("adding", chatID);
                                     break;
                                 case "edit":
                                     //Добавление заметки с названием заметки и папки
@@ -146,6 +153,7 @@ public class BotAbilities implements AbilityExtension {
                 .action(ctx -> {
                     if (ctx.firstArg().equals("folders")) {
                         //показать папки
+
                     } else if (ctx.firstArg().equals("notes")) {
                         //показать заметки
                     } else {
@@ -165,10 +173,13 @@ public class BotAbilities implements AbilityExtension {
                 .locality(ALL)
                 .input(0)
                 .action(ctx -> {
+                    Long chatID = ctx.chatId();
                     arguments.clear();
                     switch (ctx.arguments().length) {
                         case 1:
-                            //поиск по имени заметки
+                            for (String note: noteManager.searchUserNotesByName(chatID, arguments.get(0))) {
+                                silent.send(note, chatID);
+                            }
                             break;
                         case 2:
                             switch (arguments.get(0)) {
