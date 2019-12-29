@@ -64,13 +64,19 @@ public class NoteManager{
         return getNote(noteID);
     }
 
-//    public String deleteNote(String noteName) {
-//        UUID noteID = dbManager.getNoteID(noteName);
-//        if (noteID == null) {
-//            return null;
-//        }
-//
-//    }
+    public String deleteNote(String noteName, Long userID) {
+        UUID noteID = dbManager.getNoteID(noteName);
+        if (noteID == null) {
+            return null;
+        }
+        if (dbManager.deleteNote(noteID, userID)) {
+            return "note deleted";
+        } else {
+            return null;
+        }
+    }
+
+
     public ArrayList<String> searchUserNotesByName(Long userID, String searchString) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
         ArrayList<String> foundNotes = new ArrayList<>();
@@ -90,6 +96,9 @@ public class NoteManager{
     public ArrayList<String> listUserNotes(Long userID) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
         ArrayList<String> notes = new ArrayList<>();
+        if (folderSetWithNotes == null) {
+            return null;
+        }
 
         for (AbstractMap.SimpleEntry<String, Set<UUID>> folderPair : folderSetWithNotes) {
             for (UUID noteID : folderPair.getValue()) {
