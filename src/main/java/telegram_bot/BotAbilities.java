@@ -159,10 +159,12 @@ public class BotAbilities implements AbilityExtension {
                         case 2:
                             switch (arguments.get(0)) {
                                 case "content":
-                                    //поиск по контенту
+
                                     break;
                                 case "notename":
-                                    //поиск по имени заметки
+                                    for (String note: noteManager.searchUserNotesByName(chatID, arguments.get(1))) {
+                                        silent.send(note, chatID);
+                                    }
                                     break;
                                 case "tag":
                                     //поиск по тэгу
@@ -217,6 +219,33 @@ public class BotAbilities implements AbilityExtension {
                         REPLY,
                         isReplyToBot(),
                         isReplyToMessage(replyMessageNewContent))
+                .build();
+    }
+
+    private Ability editNameNote() {
+        String replyMessageOldName = "Input old name note";
+        String replyMessageNewName = "Input new name note";
+        String[] nameNote = new String[1];
+        return Ability.builder()
+                .name("editnamenote")
+                .info("Edit name note")
+                .input(0)
+                .privacy(PUBLIC)
+                .locality(ALL)
+                .action(ctx->{
+                    silent.forceReply(replyMessageOldName, ctx.chatId());
+                })
+                .reply(upd->{
+                    nameNote[0] = upd.getMessage().getText();
+                    silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
+                },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessageNewName))
+                .reply(upd -> {
+                    silent.send(noteManager.editNoteName(nameNote[0], upd.getMessage().getText(), upd.getMessage().getChatId()), upd.getMessage().getChatId());
+                })
                 .build();
     }
 
