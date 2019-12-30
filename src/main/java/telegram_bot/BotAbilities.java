@@ -82,6 +82,8 @@ public class BotAbilities implements AbilityExtension {
                                     noteManager.addNote(chatID, textNote);
                                     break;
                                 case 1:
+                                    System.out.println("name:");
+                                    System.out.printf(arguments.get(0));
                                     noteManager.addNote(chatID, textNote, arguments.get(0));
                                     break;
                                 case 2:
@@ -188,15 +190,7 @@ public class BotAbilities implements AbilityExtension {
                             //ошибка или чо-то еще
                             break;
                     }
-                    silent.forceReply(replyMessage, ctx.chatId());
                 })
-                .reply(upd -> {
-
-                        },
-                        MESSAGE,
-                        REPLY,
-                        isReplyToBot(),
-                        isReplyToMessage(replyMessage))
                 .build();
     }
 
@@ -232,7 +226,7 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
-    private Ability editNameNote() {
+    public Ability editNameNote() {
         String replyMessageOldName = "Input old name note";
         String replyMessageNewName = "Input new name note";
         String[] nameNote = new String[1];
@@ -242,35 +236,35 @@ public class BotAbilities implements AbilityExtension {
                 .input(0)
                 .privacy(PUBLIC)
                 .locality(ALL)
-                .action(ctx->{
+                .action(ctx -> {
                     silent.forceReply(replyMessageOldName, ctx.chatId());
                 })
-                .reply(upd->{
-                    nameNote[0] = upd.getMessage().getText();
-                    silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
-                },
-                        MESSAGE,
-                        REPLY,
-                        isReplyToBot(),
-                        isReplyToMessage(replyMessageNewName))
-                .reply(upd -> {
-                    silent.send(noteManager.editNoteName(nameNote[0], upd.getMessage().getText(), upd.getMessage().getChatId()), upd.getMessage().getChatId());
-                })
+//                .reply(upd -> {
+//                    nameNote[0] = upd.getMessage().getText();
+//                    silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
+//                },
+//                        MESSAGE,
+//                        REPLY,
+//                        isReplyToBot(),
+//                        isReplyToMessage(replyMessageNewName))
+//                .reply(upd -> {
+//                    silent.send(noteManager.editNoteName(nameNote[0], upd.getMessage().getText(), upd.getMessage().getChatId()), upd.getMessage().getChatId());
+//                })
                 .build();
     }
 
-    private Ability deleteNote() {
-        String replyMessage = "Input name note";
+    public Ability deleteNote() {
+        String replyMessage = "Input name note1";
         return Ability.builder()
                 .name("deletenote")
                 .info("Delete note")
                 .input(0)
                 .privacy(PUBLIC)
                 .locality(ALL)
-                .action(ctx->{
+                .action(ctx -> {
                     silent.forceReply(replyMessage, ctx.chatId());
                 })
-                .reply(upd->{
+                .reply(upd -> {
                             silent.send(noteManager.deleteNote(upd.getMessage().getText(),upd.getMessage().getChatId()),upd.getMessage().getChatId());
                         },
                         MESSAGE,
@@ -280,32 +274,37 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
-    private Ability changeFolder() {
-        String replyMessageOldName = "Input name note";
-        String replyMessageNewName = "Input name new folder";
-        String[] nameNote = new String[1];
-        return Ability.builder()
-                .name("changefolder")
-                .info("Change note's folder")
-                .input(0)
-                .privacy(PUBLIC)
-                .locality(ALL)
-                .action(ctx->{
-                    silent.forceReply(replyMessageOldName, ctx.chatId());
-                })
-                .reply(upd->{
-                            nameNote[0] = upd.getMessage().getText();
-                            silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
-                        },
-                        MESSAGE,
-                        REPLY,
-                        isReplyToBot(),
-                        isReplyToMessage(replyMessageNewName))
-                .reply(upd -> {
-                    silent.send(noteManager.editNoteFolder(nameNote[0], upd.getMessage().getText(), upd.getMessage().getChatId()), upd.getMessage().getChatId());
-                })
-                .build();
-    }
+//    public Ability changeFolder() {
+//        String replyMessageOldName = "Input name note";
+//        String replyMessageNewName = "Input name new folder";
+//        String[] nameNote = new String[1];
+//        return Ability.builder()
+//                .name("changefolder")
+//                .info("Change note's folder")
+//                .input(0)
+//                .privacy(PUBLIC)
+//                .locality(ALL)
+//                .action(ctx -> {
+//                    silent.forceReply(replyMessageOldName, ctx.chatId());
+//                })
+//                .reply(upd -> {
+//                            nameNote[0] = upd.getMessage().getText();
+//                            silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
+//                        },
+//                        MESSAGE,
+//                        REPLY,
+//                        isReplyToBot(),
+//                        isReplyToMessage(replyMessageNewName))
+//                .reply(upd -> {
+//                    Long chatID = upd.getMessage().getChatId();
+//                    String editedNote = noteManager.editNoteFolder(nameNote[0], upd.getMessage().getText(), chatID);
+//                    if (editedNote == null) {
+//                        silent.send("no note found", chatID);
+//                    }
+//                    silent.send("note edited:\\n" + editedNote, chatID);
+//                })
+//                .build();
+//    }
 
     private Predicate<Update> isReplyToMessage(String message) {
         return upd -> {
