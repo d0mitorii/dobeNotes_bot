@@ -376,7 +376,11 @@ public class BotAbilities implements AbilityExtension {
                         silent.send("no note found", chatID);
                     }
                     silent.send("note edited:\\n" + editedNote, chatID);
-                })
+                },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessageNewName))
                 .build();
     }
 
