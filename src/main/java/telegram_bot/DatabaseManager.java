@@ -36,7 +36,7 @@ public class DatabaseManager {
         UUID noteID = UUID.randomUUID();
         editNoteContent(noteID, content);
         editNoteFolder(userID, noteID, folder);
-        editNoteName(noteID, noteName);
+        editNoteName(userID, noteID, noteName);
         //updateNoteTags(noteID);
         db.commit();
         return noteID;
@@ -48,17 +48,19 @@ public class DatabaseManager {
             db.commit();
     }
 
-    public void editNoteName(UUID noteID, String newName) {
+    public void editNoteName(Long userID, UUID noteID, String newName) {
+
         Map<UUID, String> noteNameMap = db.getMap(NOTE_TO_NOTENAME);
-        Map<String, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
+        Map<AbstractMap.SimpleEntry<String, Long>, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
 
         String oldName = noteNameMap.get(noteID);
         if (oldName != null) {
-            noteIdMap.remove(oldName);
+            AbstractMap.SimpleEntry<String, Long> oldKey= new AbstractMap.SimpleEntry<>(oldName, userID);
+            noteIdMap.remove(oldKey);
         }
-
+        AbstractMap.SimpleEntry<String, Long> newKey = new AbstractMap.SimpleEntry<>(newName, userID);
         noteNameMap.put(noteID, newName);
-        noteIdMap.put(newName, noteID);
+        noteIdMap.put(newKey, noteID);
         db.commit();
     }
 
@@ -127,12 +129,9 @@ public class DatabaseManager {
 //
 //    }
 
-    public UUID getNoteID(String noteName) {
-        Map<String, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
-        System.out.println(noteIdMap);
-        System.out.println(noteIdMap.keySet());
-        System.out.println(noteIdMap.get(noteName));
-        return noteIdMap.get(noteName);
+    public UUID getNoteID(String noteName, Long userID) {
+        Map<AbstractMap.SimpleEntry<String, Long>, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
+        return noteIdMap.get(new AbstractMap.SimpleEntry<>(noteName, userID));
     }
 
     public String getNoteContent(UUID noteID) {
@@ -195,7 +194,12 @@ public class DatabaseManager {
         return folderSetWithNotes;
     }
 
-    public boolean deleteNote(UUID noteID, Long userID) {
+    public boolean deleteNote(String noteName, Long userID) {
+        UUID noteID = getNoteID(noteName, userID);
+        if (noteID == null) {
+            return false;
+        }
+
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = getFolderSetWithNotes(userID);
         String folder = getFolder(noteID);
         AbstractMap.SimpleEntry<Long, String> folderPair = new AbstractMap.SimpleEntry<>(userID, folder);
@@ -205,9 +209,8 @@ public class DatabaseManager {
         noteSet.remove(noteID);
         folderToNotesMap.put(folderPair, noteSet);
 
-        String noteName = getNoteName(noteID);
-        Map<String, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
-        noteIdMap.remove(noteName);
+        Map<AbstractMap.SimpleEntry<String, Long>, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
+        noteIdMap.remove(new AbstractMap.SimpleEntry<>(noteName, userID));
 
         Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
         noteContentMap.remove(noteID);
@@ -221,5 +224,6 @@ public class DatabaseManager {
         db.commit();
         return true;
     }
+
 }
 
