@@ -15,12 +15,12 @@ public class Main {
 
         System.out.println(System.getenv("TOKEN"));
         try {
-            DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
-            botOptions.setProxyHost("51.158.68.133");
-            botOptions.setProxyPort(8811);
-            botOptions.setProxyType(DefaultBotOptions.ProxyType.HTTP);
-            telegramBotsApi.registerBot(new BOT(botOptions));
-//            telegramBotsApi.registerBot(new BOT());
+//            DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
+//            botOptions.setProxyHost("51.158.68.133");
+//            botOptions.setProxyPort(8811);
+//            botOptions.setProxyType(DefaultBotOptions.ProxyType.HTTP);
+//            telegramBotsApi.registerBot(new BOT(botOptions));
+            telegramBotsApi.registerBot(new BOT());
         } catch (TelegramApiRequestException e) {
             e.printStackTrace();
         }
