@@ -20,8 +20,8 @@ public class NoteManager{
         return dbManager.insertNote(userID, content, folder, verifyNoteNameUnambiguity(userID, noteName));
     }
 
-    public String getNote(String noteName) {
-        UUID noteID = dbManager.getNoteID(noteName);
+    public String getNote(Long userID, String noteName) {
+        UUID noteID = dbManager.getNoteID(noteName, userID);
         if (noteID == null) {
             return null;
         } else {
@@ -37,26 +37,26 @@ public class NoteManager{
                 + getNoteContent(noteID);
     }
 
-    public String editNoteContent(String noteName, String newContent) {
-        UUID noteID = dbManager.getNoteID(noteName);
+    public String editNoteContent(Long userID, String noteName, String newContent) {
+        UUID noteID = dbManager.getNoteID(noteName, userID);
         if (noteID == null) {
             return null;
         }
-        dbManager.editNoteContent(noteID,newContent);
+        dbManager.editNoteContent(noteID, newContent);
         return getNote(noteID);
     }
 
-    public String editNoteName(String noteName, String newName, Long userID) {
-        UUID noteID = dbManager.getNoteID(noteName);
+    public String editNoteName(Long userID, String noteName, String newName) {
+        UUID noteID = dbManager.getNoteID(noteName, userID);
         if (noteID == null) {
             return null;
         }
-        dbManager.editNoteName(noteID, verifyNoteNameUnambiguity(userID, newName));
+        dbManager.editNoteName(userID, noteID, verifyNoteNameUnambiguity(userID, newName));
         return getNote(noteID);
     }
 
-    public String editNoteFolder(String noteName, String newFolder, Long userID) {
-        UUID noteID = dbManager.getNoteID(noteName);
+    public String editNoteFolder(Long userID, String noteName, String newFolder) {
+        UUID noteID = dbManager.getNoteID(noteName, userID);
         if (noteID == null) {
             return null;
         }
@@ -64,15 +64,12 @@ public class NoteManager{
         return getNote(noteID);
     }
 
-    public String deleteNote(String noteName, Long userID) {
-        UUID noteID = dbManager.getNoteID(noteName);
-        if (noteID == null) {
-            return null;
-        }
-        if (dbManager.deleteNote(noteID, userID)) {
+    public String deleteNote(Long userID, String noteName) {
+
+        if (dbManager.deleteNote(noteName, userID)) {
             return "note deleted";
         } else {
-            return null;
+            return "note not found";
         }
     }
 
@@ -105,7 +102,9 @@ public class NoteManager{
                     notes.add(getNote(noteID));
             }
         }
-
+        if (notes.isEmpty()) {
+            return null;
+        }
         return notes;
     }
 

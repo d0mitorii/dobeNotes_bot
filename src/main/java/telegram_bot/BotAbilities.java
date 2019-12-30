@@ -82,8 +82,6 @@ public class BotAbilities implements AbilityExtension {
                                     noteManager.addNote(chatID, textNote);
                                     break;
                                 case 1:
-                                    System.out.println("name:");
-                                    System.out.printf(arguments.get(0));
                                     noteManager.addNote(chatID, textNote, arguments.get(0));
                                     break;
                                 case 2:
@@ -217,7 +215,7 @@ public class BotAbilities implements AbilityExtension {
                     isReplyToBot(),
                     isReplyToMessage(replyMessageNoteName))
                 .reply(upd ->{
-                    silent.send(noteManager.editNoteContent(noteName[0], upd.getMessage().getText()), upd.getMessage().getChatId());
+                    silent.send(noteManager.editNoteContent(upd.getMessage().getChatId(), noteName[0], upd.getMessage().getText()), upd.getMessage().getChatId());
                 },
                         MESSAGE,
                         REPLY,
@@ -239,17 +237,21 @@ public class BotAbilities implements AbilityExtension {
                 .action(ctx -> {
                     silent.forceReply(replyMessageOldName, ctx.chatId());
                 })
-//                .reply(upd -> {
-//                    nameNote[0] = upd.getMessage().getText();
-//                    silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
-//                },
-//                        MESSAGE,
-//                        REPLY,
-//                        isReplyToBot(),
-//                        isReplyToMessage(replyMessageNewName))
-//                .reply(upd -> {
-//                    silent.send(noteManager.editNoteName(nameNote[0], upd.getMessage().getText(), upd.getMessage().getChatId()), upd.getMessage().getChatId());
-//                })
+                .reply(upd -> {
+                    nameNote[0] = upd.getMessage().getText();
+                    silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
+                },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessageOldName))
+                .reply(upd -> {
+                    silent.send(noteManager.editNoteName(upd.getMessage().getChatId(), nameNote[0], upd.getMessage().getText()), upd.getMessage().getChatId());
+                },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessageNewName))
                 .build();
     }
 
@@ -265,7 +267,8 @@ public class BotAbilities implements AbilityExtension {
                     silent.forceReply(replyMessage, ctx.chatId());
                 })
                 .reply(upd -> {
-                            silent.send(noteManager.deleteNote(upd.getMessage().getText(),upd.getMessage().getChatId()),upd.getMessage().getChatId());
+                            Long chatID = upd.getMessage().getChatId();
+                            silent.send(noteManager.deleteNote(chatID, upd.getMessage().getText()), chatID);
                         },
                         MESSAGE,
                         REPLY,
