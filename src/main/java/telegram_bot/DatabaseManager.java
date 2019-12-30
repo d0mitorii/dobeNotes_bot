@@ -129,6 +129,9 @@ public class DatabaseManager {
 
     public UUID getNoteID(String noteName) {
         Map<String, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
+        System.out.println(noteIdMap);
+        System.out.println(noteIdMap.keySet());
+        System.out.println(noteIdMap.get(noteName));
         return noteIdMap.get(noteName);
     }
 
