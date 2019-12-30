@@ -41,8 +41,16 @@ public class BotAbilities implements AbilityExtension {
                 .input(0)
                 .action(ctx -> {
                     noteManager.addUserName(ctx);
-                    silent.send("Hello!\n" + noteManager.getUserName(ctx.chatId()) +"I am a bot for notes.", ctx.chatId());
-                    silent.send("Here is my list of commands:\n", ctx.chatId());
+                    silent.send("Hello, " + noteManager.getUserName(ctx.chatId()) +"\nI am a bot for notes.", ctx.chatId());
+                    silent.send("Here is my list of commands:\n"+
+                            nameAndInfo(addNote()) +
+                            nameAndInfo(listNotes()) +
+                            nameAndInfo(listFolders()) +
+                            nameAndInfo(search()) +
+                            nameAndInfo(editNote()) +
+                            nameAndInfo(editNoteName()) +
+                            nameAndInfo(deleteNote()) +
+                            nameAndInfo(deleteFolder()), ctx.chatId());
                     silent.execute(Keyboards.addKeyBoard("They created me:\n@domitorii, @Bfl4t", ctx));
                 })
                 .build();
@@ -135,7 +143,7 @@ public class BotAbilities implements AbilityExtension {
                             silent.send(folder, chatID);
                         }
                     } else {
-                        silent.send("You don't have any notes", chatID);
+                        silent.send("You don't have any folders", chatID);
                     }
                 })
                 .build();
