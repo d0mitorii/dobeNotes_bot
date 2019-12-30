@@ -65,11 +65,18 @@ public class NoteManager{
     }
 
     public String deleteNote(Long userID, String noteName) {
-
         if (dbManager.deleteNote(noteName, userID)) {
             return "note deleted";
         } else {
             return "note not found";
+        }
+    }
+
+    public String deleteFolder(Long userID, String folder) {
+        if (dbManager.deleteFolder(userID, folder)) {
+            return "folder deleted";
+        } else {
+            return "folder not found";
         }
     }
 
@@ -120,6 +127,10 @@ public class NoteManager{
 
     public void addUserName(MessageContext msgContext) {
         dbManager.addUserName(msgContext);
+    }
+
+    public String getUserName(Long userID) {
+        return dbManager.getUserName(userID);
     }
 
     public String getNoteContent(UUID noteID) {

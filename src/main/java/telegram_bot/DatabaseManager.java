@@ -225,5 +225,28 @@ public class DatabaseManager {
         return true;
     }
 
+    public boolean deleteFolder(Long userID, String folder) {
+        Map<AbstractMap.SimpleEntry<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
+        AbstractMap.SimpleEntry<Long, String> folderKey = new AbstractMap.SimpleEntry<>(userID, folder);
+
+        Set<UUID> noteSet = folderToNotesMap.get(folderKey);
+        if (noteSet == null) {
+            return false;
+        }
+        for (UUID noteID: noteSet) {
+            String noteName = getNoteName(noteID);
+            deleteNote(noteName, userID);
+        }
+
+        folderToNotesMap.remove(folderKey);
+
+        Map<Long, Set<String>> userToFoldersMap = db.getMap(USERID_TO_FOLDERS);
+        Set<String> folderSet = getFolderSet(userID);
+        folderSet.remove(folder);
+        userToFoldersMap.put(userID, folderSet);
+
+        return true;
+    }
+
 }
 
