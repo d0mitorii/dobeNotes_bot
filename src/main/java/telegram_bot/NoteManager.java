@@ -8,6 +8,12 @@ import java.util.*;
 public class NoteManager{
     private static final DatabaseManager dbManager = new DatabaseManager();
 
+    public enum SearchType {
+        TAG,
+        CONTENT,
+        NAME
+    }
+
     public UUID addNote(Long userID, String content) {
         return addNote(userID, content, "untitled");
     }
@@ -40,7 +46,7 @@ public class NoteManager{
     public String editNoteContent(Long userID, String noteName, String newContent) {
         UUID noteID = dbManager.getNoteID(noteName, userID);
         if (noteID == null) {
-            return null;
+            return "a note with this name is not found";
         }
         dbManager.editNoteContent(noteID, newContent);
         return getNote(noteID);
@@ -49,7 +55,7 @@ public class NoteManager{
     public String editNoteName(Long userID, String noteName, String newName) {
         UUID noteID = dbManager.getNoteID(noteName, userID);
         if (noteID == null) {
-            return null;
+            return "a note with this name is not found";
         }
         dbManager.editNoteName(userID, noteID, verifyNoteNameUnambiguity(userID, newName));
         return getNote(noteID);
@@ -58,10 +64,25 @@ public class NoteManager{
     public String editNoteFolder(Long userID, String noteName, String newFolder) {
         UUID noteID = dbManager.getNoteID(noteName, userID);
         if (noteID == null) {
-            return null;
+            return "a note with this name is not found";
         }
         dbManager.editNoteFolder(userID, noteID, newFolder);
         return getNote(noteID);
+    }
+
+    public String renameFolder(Long userID, String oldFolderName, String newFolderName) {
+        switch(dbManager.renameFolder(userID, oldFolderName, newFolderName)) {
+            case "no folders":
+                return "you don't have any folders";
+            case "collision":
+                return "a folder with this name already exists";
+            case "success":
+                return oldFolderName + "->" + newFolderName + ": successfully renamed";
+            case "deletion error":
+                return "error deleting folder " + oldFolderName;
+            default:
+                return "unexpected error";
+        }
     }
 
     public String deleteNote(Long userID, String noteName) {
@@ -81,21 +102,35 @@ public class NoteManager{
     }
 
 
-    public ArrayList<String> searchUserNotesByName(Long userID, String searchString) {
+    public ArrayList<String> searchNotes(Long userID, String searchString, SearchType searchType) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
         ArrayList<String> foundNotes = new ArrayList<>();
 
         for (AbstractMap.SimpleEntry<String, Set<UUID>> folderPair : folderSetWithNotes) {
             for (UUID noteID : folderPair.getValue()) {
-                String noteName = getNoteName(noteID);
-                if (noteName.toLowerCase().contains(searchString.toLowerCase())) {
-                    foundNotes.add(getNote(noteID));
+                switch(searchType) {
+                    case NAME:
+                        String noteName = getNoteName(noteID);
+                        if (noteName.toLowerCase().contains(searchString.toLowerCase())) {
+                            foundNotes.add(getNote(noteID));
+                        }
+                        break;
+                    case CONTENT:
+                        String content = getNoteContent(noteID);
+                        if (content.toLowerCase().contains(searchString.toLowerCase())) {
+                            foundNotes.add(getNote(noteID));
+                        }
+                        break;
+                    case TAG:
+                        //поиск по тэгу
+                        break;
                 }
             }
         }
 
         return foundNotes;
     }
+
 
     public ArrayList<String> listUserNotes(Long userID) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
@@ -117,9 +152,7 @@ public class NoteManager{
 
     public ArrayList<String> listUserFolders(Long userID) {
         Set<String> folderSet = dbManager.getFolderSet(userID);
-        ArrayList<String> folders = new ArrayList<>();
-        folders.addAll(folderSet);
-        return folders;
+        return new ArrayList<>(folderSet);
     }
 
     public void addUserName(MessageContext msgContext) {

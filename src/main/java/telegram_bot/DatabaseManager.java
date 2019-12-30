@@ -168,8 +168,7 @@ public class DatabaseManager {
 
     public Set<String> getFolderSet(Long userID) {
         Map<Long, Set<String>> foldersMap = db.getMap(USERID_TO_FOLDERS);
-        Set<String> folderSet = foldersMap.get(userID);
-        return folderSet;
+        return foldersMap.get(userID);
     }
 
 
@@ -226,27 +225,57 @@ public class DatabaseManager {
     }
 
     public boolean deleteFolder(Long userID, String folder) {
+        Map<Long, Set<String>> userToFoldersMap = db.getMap(USERID_TO_FOLDERS);
+        Set<String> folderSet = getFolderSet(userID);
+        if (folderSet == null) {
+            return false;
+        }
+        if (!folderSet.remove(folder)) {
+            return false;
+        }
+        userToFoldersMap.put(userID, folderSet);
+
         Map<AbstractMap.SimpleEntry<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
         AbstractMap.SimpleEntry<Long, String> folderKey = new AbstractMap.SimpleEntry<>(userID, folder);
 
         Set<UUID> noteSet = folderToNotesMap.get(folderKey);
-        if (noteSet == null) {
-            return false;
+        if (noteSet != null) {
+            for (UUID noteID: noteSet) {
+                String noteName = getNoteName(noteID);
+                deleteNote(noteName, userID);
+            }
         }
-        for (UUID noteID: noteSet) {
-            String noteName = getNoteName(noteID);
-            deleteNote(noteName, userID);
-        }
-
         folderToNotesMap.remove(folderKey);
-
-        Map<Long, Set<String>> userToFoldersMap = db.getMap(USERID_TO_FOLDERS);
-        Set<String> folderSet = getFolderSet(userID);
-        folderSet.remove(folder);
-        userToFoldersMap.put(userID, folderSet);
-
+        db.commit();
         return true;
     }
 
+    public String renameFolder(Long userID, String oldFolderName, String newFolderName) {
+        Map<Long, Set<String>> userToFoldersMap = db.getMap(USERID_TO_FOLDERS);
+        Set<String> folderSet = getFolderSet(userID);
+        if (folderSet == null) {
+            return "no folders";
+        }
+        if (folderSet.contains(newFolderName)) {
+            return "collision";
+        }
+        folderSet.add(newFolderName);
+
+        Map<AbstractMap.SimpleEntry<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
+        AbstractMap.SimpleEntry<Long, String> oldFolderKey = new AbstractMap.SimpleEntry<>(userID, oldFolderName);
+        AbstractMap.SimpleEntry<Long, String> newFolderKey = new AbstractMap.SimpleEntry<>(userID, newFolderName);
+        Set<UUID> noteSet = folderToNotesMap.get(oldFolderKey);
+        if (noteSet != null) {
+            folderToNotesMap.put(newFolderKey, noteSet);
+        } else {
+            folderToNotesMap.put(newFolderKey, new HashSet<>());
+        }
+
+        if (deleteFolder(userID, oldFolderName)) {
+            return "success";
+        } else {
+            return "deletion error";
+        }
+    }
 }
 
