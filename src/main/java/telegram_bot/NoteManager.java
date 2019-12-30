@@ -1,6 +1,5 @@
 package telegram_bot;
 
-import jdk.internal.net.http.common.Pair;
 import org.telegram.abilitybots.api.objects.MessageContext;
 
 import java.util.*;
@@ -28,6 +27,7 @@ public class NoteManager{
 
     public String getNote(Long userID, String noteName) {
         UUID noteID = dbManager.getNoteID(noteName, userID);
+
         if (noteID == null) {
             return null;
         } else {
@@ -45,27 +45,33 @@ public class NoteManager{
 
     public String editNoteContent(Long userID, String noteName, String newContent) {
         UUID noteID = dbManager.getNoteID(noteName, userID);
+
         if (noteID == null) {
             return "a note with this name is not found";
         }
+
         dbManager.editNoteContent(noteID, newContent);
         return getNote(noteID);
     }
 
     public String editNoteName(Long userID, String noteName, String newName) {
         UUID noteID = dbManager.getNoteID(noteName, userID);
+
         if (noteID == null) {
             return "a note with this name is not found";
         }
+
         dbManager.editNoteName(userID, noteID, verifyNoteNameUnambiguity(userID, newName));
         return getNote(noteID);
     }
 
     public String editNoteFolder(Long userID, String noteName, String newFolder) {
         UUID noteID = dbManager.getNoteID(noteName, userID);
+
         if (noteID == null) {
             return "a note with this name is not found";
         }
+
         dbManager.editNoteFolder(userID, noteID, newFolder);
         return getNote(noteID);
     }
@@ -122,7 +128,10 @@ public class NoteManager{
                         }
                         break;
                     case TAG:
-                        //поиск по тэгу
+                        List<String> tags = getNoteTags(noteID);
+                        if (tags.contains(searchString)) {
+                            foundNotes.add(getNote(noteID));
+                        }
                         break;
                 }
             }
@@ -134,19 +143,22 @@ public class NoteManager{
 
     public ArrayList<String> listUserNotes(Long userID) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
-        ArrayList<String> notes = new ArrayList<>();
+
         if (folderSetWithNotes == null) {
             return null;
         }
 
+        ArrayList<String> notes = new ArrayList<>();
         for (AbstractMap.SimpleEntry<String, Set<UUID>> folderPair : folderSetWithNotes) {
             for (UUID noteID : folderPair.getValue()) {
                     notes.add(getNote(noteID));
             }
         }
+
         if (notes.isEmpty()) {
             return null;
         }
+
         return notes;
     }
 
@@ -165,30 +177,41 @@ public class NoteManager{
 
     public String getNoteContent(UUID noteID) {
         String note = dbManager.getNoteContent(noteID);
+
         if (note == null) {
             return "error: no content";
         }
+
         return note;
     }
 
     public String getFolder(UUID noteID) {
         String folder = dbManager.getFolder(noteID);
+
         if (folder == null) {
             return "error: no folder";
         }
+
         return folder;
     }
 
     public String getNoteName(UUID noteID) {
         String noteName = dbManager.getNoteName(noteID);
+
         if (noteName == null) {
             return "error: no note name";
         }
+
         return noteName;
+    }
+
+    public List<String> getNoteTags(UUID noteID) {
+        return dbManager.getNoteTags(noteID);
     }
 
     private String verifyNoteNameUnambiguity(Long userID, String name) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
+
         if (folderSetWithNotes == null) {
             return name;
         }
@@ -212,5 +235,4 @@ public class NoteManager{
 
         return newName;
     }
-
 }

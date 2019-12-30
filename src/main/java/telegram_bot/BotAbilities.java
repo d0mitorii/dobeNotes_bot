@@ -174,7 +174,7 @@ public class BotAbilities implements AbilityExtension {
 
                     switch (ctx.arguments().length) {
                         case 1:
-                            for (String note: noteManager.searchUserNotesByName(chatID, arguments.get(0))) {
+                            for (String note: noteManager.searchNotes(chatID, arguments.get(0), NoteManager.SearchType.NAME)) {
                                 silent.send(note, chatID);
                             }
                             break;
@@ -184,7 +184,7 @@ public class BotAbilities implements AbilityExtension {
 
                                     break;
                                 case "notename":
-                                    for (String note: noteManager.searchUserNotesByName(chatID, arguments.get(1))) {
+                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.NAME)) {
                                         silent.send(note, chatID);
                                     }
                                     break;

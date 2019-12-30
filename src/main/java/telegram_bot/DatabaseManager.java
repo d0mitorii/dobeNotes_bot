@@ -1,7 +1,5 @@
 package telegram_bot;
 
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.telegram.abilitybots.api.db.DBContext;
 import org.telegram.abilitybots.api.db.MapDBContext;
 import org.telegram.abilitybots.api.objects.MessageContext;
@@ -13,7 +11,6 @@ import java.util.regex.Pattern;
 
 public class DatabaseManager {
 
-
     private static final String USERID_TO_USERNAME = "USERID_TO_USERNAME";
     private static final String USERID_TO_FOLDERS = "USERID_TO_FOLDERS";
     private static final String USERID_TO_NOTES = "USERID_TO_NOTES";
@@ -23,6 +20,7 @@ public class DatabaseManager {
     private static final String NOTENAME_TO_NOTEID= "NOTENAME_TO_NOTEID";
     private static final String NOTE_TO_TAGS = "NOTE_TO_TAGS";
     private static final String NOTE_TO_FOLDER = "NOTE_TO_FOLDER";
+
     private final DBContext db;
 
 
@@ -31,25 +29,26 @@ public class DatabaseManager {
         db = MapDBContext.onlineInstance("." + sep + "src" + sep + "main" + sep + "resources" + sep + "dobeDB");
     }
 
-
     public UUID insertNote(Long userID, String content, String folder, String noteName) {
         UUID noteID = UUID.randomUUID();
         editNoteContent(noteID, content);
         editNoteFolder(userID, noteID, folder);
         editNoteName(userID, noteID, noteName);
-        //updateNoteTags(noteID);
+        updateNoteTags(noteID);
+
         db.commit();
         return noteID;
     }
 
     public void editNoteContent(UUID noteID, String newContent) {
-            Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
-            noteContentMap.put(noteID, newContent);
-            db.commit();
+        Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
+        noteContentMap.put(noteID, newContent);
+        updateNoteTags(noteID);
+
+        db.commit();
     }
 
     public void editNoteName(Long userID, UUID noteID, String newName) {
-
         Map<UUID, String> noteNameMap = db.getMap(NOTE_TO_NOTENAME);
         Map<AbstractMap.SimpleEntry<String, Long>, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
 
@@ -58,9 +57,11 @@ public class DatabaseManager {
             AbstractMap.SimpleEntry<String, Long> oldKey= new AbstractMap.SimpleEntry<>(oldName, userID);
             noteIdMap.remove(oldKey);
         }
+
         AbstractMap.SimpleEntry<String, Long> newKey = new AbstractMap.SimpleEntry<>(newName, userID);
         noteNameMap.put(noteID, newName);
         noteIdMap.put(newKey, noteID);
+
         db.commit();
     }
 
@@ -73,9 +74,9 @@ public class DatabaseManager {
 
         String oldFolder = noteToFolderMap.get(noteID);
         if (oldFolder != null) {
-            
             AbstractMap.SimpleEntry<Long,String> oldFolderPair = new AbstractMap.SimpleEntry<>(userID, oldFolder);
             Set<UUID> oldNoteSet = folderToNotesMap.get(oldFolderPair);
+
             if (oldNoteSet != null) {
                 oldNoteSet.remove(noteID);
                 folderToNotesMap.put(oldFolderPair, oldNoteSet);
@@ -101,33 +102,12 @@ public class DatabaseManager {
         if (folderSet == null) {
             folderSet = new HashSet<>();
         }
+
         folderSet.add(folder);
         foldersMap.put(userID, folderSet);
+
         db.commit();
     }
-
-
-//
-//    private void updateNoteTags(UUID noteID) {
-//        Map<UUID, String> noteContentMap = db.getMap(NOTE_TO_CONTENT);
-//        String
-//    }
-//
-//    public List<String> getTags(String content) {
-//        String[] contentParts = content.split("#");
-//        List<String> tags = new ArrayList<>();
-//        for(String part : contentParts) {
-//            part.replace("[^0-9a-zA-Z]", "");
-//        }
-//        Pattern tagPattern = Pattern.compile("#(\\S+)");
-//        Matcher matcher = tagPattern.matcher(content);
-//        List<String> tags = new ArrayList<String>();
-//        while (matcher.find()) {
-//            tags.add(matcher.group(1));
-//        }
-//        System.out.println(tags);
-//
-//    }
 
     public UUID getNoteID(String noteName, Long userID) {
         Map<AbstractMap.SimpleEntry<String, Long>, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
@@ -157,6 +137,7 @@ public class DatabaseManager {
         Long userID = msgContext.chatId();
         Map<Long, String> userNamesMap = db.getMap(USERID_TO_USERNAME);
         userNamesMap.put(userID, userName);
+
         db.commit();
     }
 
@@ -190,6 +171,7 @@ public class DatabaseManager {
                 folderSetWithNotes.add(folderWithNotes);
             }
         }
+
         return folderSetWithNotes;
     }
 
@@ -246,6 +228,7 @@ public class DatabaseManager {
             }
         }
         folderToNotesMap.remove(folderKey);
+
         db.commit();
         return true;
     }
@@ -276,6 +259,41 @@ public class DatabaseManager {
         } else {
             return "deletion error";
         }
+    }
+
+    public List<String> getNoteTags(UUID noteID) {
+        String content = getNoteContent(noteID);
+        if (content == null) {
+            return null;
+        }
+        return getTags(content);
+    }
+
+    private List<String> updateNoteTags(UUID noteID) {
+        List<String> tags = getNoteTags(noteID);
+        if (tags == null) {
+            return null;
+        }
+        Map<UUID, List<String>> noteToTagsMap = db.getMap(NOTE_TO_TAGS);
+        noteToTagsMap.put(noteID, tags);
+        db.commit();
+        return tags;
+    }
+
+    private List<String> getTags(String content) {
+        Pattern tagPattern = Pattern.compile("#([0-9a-zA-Z]+)");
+        Matcher matcher = tagPattern.matcher(content);
+        List<String> tags = new ArrayList<>();
+
+        while (matcher.find()) {
+            tags.add(matcher.group(1));
+        }
+
+        for (String tag: tags) {
+            System.out.println(tag);
+        }
+
+        return tags;
     }
 }
 
