@@ -243,6 +243,7 @@ public class DatabaseManager {
             return "collision";
         }
         folderSet.add(newFolderName);
+        userToFoldersMap.put(userID, folderSet);
 
         Map<AbstractMap.SimpleEntry<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
         AbstractMap.SimpleEntry<Long, String> oldFolderKey = new AbstractMap.SimpleEntry<>(userID, oldFolderName);
@@ -250,6 +251,9 @@ public class DatabaseManager {
         Set<UUID> noteSet = folderToNotesMap.get(oldFolderKey);
         if (noteSet != null) {
             folderToNotesMap.put(newFolderKey, noteSet);
+            for (UUID noteID: noteSet) {
+                editNoteFolder(userID, noteID, newFolderName);
+            }
         } else {
             folderToNotesMap.put(newFolderKey, new HashSet<>());
         }
@@ -287,10 +291,6 @@ public class DatabaseManager {
 
         while (matcher.find()) {
             tags.add(matcher.group(1));
-        }
-
-        for (String tag: tags) {
-            System.out.println(tag);
         }
 
         return tags;
