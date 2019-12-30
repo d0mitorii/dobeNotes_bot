@@ -118,10 +118,7 @@ public class NoteManager{
     public ArrayList<String> listUserFolders(Long userID) {
         Set<String> folderSet = dbManager.getFolderSet(userID);
         ArrayList<String> folders = new ArrayList<>();
-
-        for(String folder: folderSet) {
-            folders.add(folder);
-        }
+        folders.addAll(folderSet);
         return folders;
     }
 
@@ -156,7 +153,6 @@ public class NoteManager{
         }
         return noteName;
     }
-
 
     private String verifyNoteNameUnambiguity(Long userID, String name) {
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = dbManager.getFolderSetWithNotes(userID);
