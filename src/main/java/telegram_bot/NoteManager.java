@@ -137,7 +137,11 @@ public class NoteManager{
             }
         }
 
-        return foundNotes;
+        if (foundNotes.isEmpty()) {
+            return new ArrayList<>(Arrays.asList("nothing found"));
+        } else {
+            return foundNotes;
+        }
     }
 
 

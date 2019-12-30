@@ -360,8 +360,9 @@ public class BotAbilities implements AbilityExtension {
                     String editedNote = noteManager.editNoteFolder(chatID, nameNote[0], upd.getMessage().getText());
                     if (editedNote == null) {
                         silent.send("no note found", chatID);
+                    } else {
+                        silent.send("note edited:\n" + editedNote, chatID);
                     }
-                    silent.send("note edited:\n" + editedNote, chatID);
                 },
                         MESSAGE,
                         REPLY,

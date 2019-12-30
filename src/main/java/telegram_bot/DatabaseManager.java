@@ -293,10 +293,6 @@ public class DatabaseManager {
             tags.add(matcher.group(1));
         }
 
-        for (String tag: tags) {
-            System.out.println(tag);
-        }
-
         return tags;
     }
 }
