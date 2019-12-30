@@ -154,7 +154,7 @@ public class BotAbilities implements AbilityExtension {
         List<String> arguments = new ArrayList<>();
         return Ability.builder()
                 .name("search")
-                .info("<content/notename/tag> <text>")
+                .info("<notename> <text>")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
