@@ -353,7 +353,7 @@ public class BotAbilities implements AbilityExtension {
         String replyMessageNewName = "Input name new folder";
         String[] nameNote = new String[1];
         return Ability.builder()
-                .name("changefolder")
+                .name("change")
                 .info("Change note's folder")
                 .input(0)
                 .privacy(PUBLIC)
