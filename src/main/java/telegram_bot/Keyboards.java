@@ -26,6 +26,29 @@ public class Keyboards {
         sendMessage.setText(text);
         sendMessage.setReplyMarkup(InlineKeyboardMarkup);
         sendMessage.setChatId(upd.chatId());
+
+        return sendMessage;
+    }
+
+    public static SendMessage addReplyKeyboard(MessageContext ctx) {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        SendMessage sendMessage = new SendMessage();
+
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        replyKeyboardMarkup.getResizeKeyboard();
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        KeyboardRow keyboardRowFirst = new KeyboardRow();
+        keyboardRowFirst.add("Content");
+        keyboardRowFirst.add("Note name");
+        keyboardRowFirst.add("Tag");
+        keyboard.add(keyboardRowFirst);
+        replyKeyboardMarkup.setKeyboard(keyboard);
+
+        sendMessage.setText("How will we search?");
+        sendMessage.setChatId(ctx.chatId());
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
+
         return sendMessage;
     }
 

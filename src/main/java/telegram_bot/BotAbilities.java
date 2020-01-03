@@ -3,9 +3,11 @@ package telegram_bot;
 import org.telegram.abilitybots.api.objects.Ability;
 import org.telegram.abilitybots.api.sender.SilentSender;
 import org.telegram.abilitybots.api.util.AbilityExtension;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -41,8 +43,8 @@ public class BotAbilities implements AbilityExtension {
                 .input(0)
                 .action(ctx -> {
                     noteManager.addUserName(ctx);
-                    silent.send("Hello, " + noteManager.getUserName(ctx.chatId()) +"\nI am a bot for notes.", ctx.chatId());
-                    silent.send("Here is my list of commands:\n"+
+                    silent.send("Hello, " + noteManager.getUserName(ctx.chatId()) + "\nI am a bot for notes.", ctx.chatId());
+                    silent.send("Here is my list of commands:\n" +
                             nameAndInfo(addNote()) +
                             nameAndInfo(listNotes()) +
                             nameAndInfo(listFolders()) +
@@ -119,7 +121,7 @@ public class BotAbilities implements AbilityExtension {
                     Long chatID = ctx.chatId();
 
                     if (noteManager.listUserNotes(chatID) != null) {
-                        for (String note: noteManager.listUserNotes(chatID)) {
+                        for (String note : noteManager.listUserNotes(chatID)) {
                             silent.send(note, chatID);
                         }
                     } else {
@@ -141,7 +143,7 @@ public class BotAbilities implements AbilityExtension {
                     Long chatID = ctx.chatId();
 
                     if (noteManager.listUserNotes(chatID) != null) {
-                        for (String folder: noteManager.listUserFolders(chatID)) {
+                        for (String folder : noteManager.listUserFolders(chatID)) {
                             silent.send(folder, chatID);
                         }
                     } else {
@@ -152,55 +154,42 @@ public class BotAbilities implements AbilityExtension {
     }
 
     public Ability search() {
-        List<String> arguments = new ArrayList<>();
+        String[] text = new String[2];
         return Ability.builder()
                 .name("search")
-                .info("<notename> <text>")
+                .info("Search note")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
-                .action(ctx -> {
-                    Long chatID = ctx.chatId();
-                    arguments.clear();
+                .action(ctx ->
+                        silent.execute(Keyboards.addReplyKeyboard(ctx)))
+                .reply(upd -> {
+                        text[0] = upd.getMessage().getText();
+                        silent.forceReply("Enter your search term", upd.getMessage().getChatId());
+                })
+                .reply(upd -> {
+                    text[1] = upd.getMessage().getText();
+                    Long chatID = upd.getMessage().getChatId();
 
-                    switch (ctx.arguments().length) {
-                        case 1:
-                            arguments.add(ctx.firstArg()); //имя заметки
-                            break;
-                        case 2:
-                            arguments.add(ctx.firstArg()); // content/notename/tag
-                            arguments.add(ctx.secondArg()); // text
-                            break;
-                    }
-
-                    switch (ctx.arguments().length) {
-                        case 1:
-                            for (String note: noteManager.searchNotes(chatID, arguments.get(0), NoteManager.SearchType.NAME)){
+                    switch (text[0]) {
+                        case "Content":
+                            for (String note: noteManager.searchNotes(chatID, text[1], NoteManager.SearchType.CONTENT)){
                                 silent.send(note, chatID);
                             }
                             break;
-                        case 2:
-                            switch (arguments.get(0)) {
-                                case "content":
-                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.CONTENT)){
-                                        silent.send(note, chatID);
-                                    }
-                                    break;
-                                case "notename":
-                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.NAME)) {
-                                        silent.send(note, chatID);
-                                    }
-                                    break;
-                                case "tag":
-                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.TAG)){
-                                        silent.send(note, chatID);
-                                    }
-                                    break;
-                                default:
-                                    silent.send("I don't understand", chatID);
-                                    break;
+
+                        case "Note name":
+                            for (String note: noteManager.searchNotes(chatID, text[1], NoteManager.SearchType.NAME)){
+                                silent.send(note, chatID);
                             }
                             break;
+
+                        case "Tag":
+                            for (String note: noteManager.searchNotes(chatID, text[1], NoteManager.SearchType.TAG)){
+                                silent.send(note, chatID);
+                            }
+                            break;
+
                         default:
                             silent.send("I don't understand", chatID);
                             break;
@@ -208,6 +197,64 @@ public class BotAbilities implements AbilityExtension {
                 })
                 .build();
     }
+
+//    public Ability search() {
+//        List<String> arguments = new ArrayList<>();
+//        return Ability.builder()
+//                .name("search")
+//                .info("<notename> <text>")
+//                .privacy(PUBLIC)
+//                .locality(ALL)
+//                .input(0)
+//                .action(ctx -> {
+//                    Long chatID = ctx.chatId();
+//                    arguments.clear();
+//
+//                    switch (ctx.arguments().length) {
+//                        case 1:
+//                            arguments.add(ctx.firstArg()); //имя заметки
+//                            break;
+//                        case 2:
+//                            arguments.add(ctx.firstArg()); // content/notename/tag
+//                            arguments.add(ctx.secondArg()); // text
+//                            break;
+//                    }
+//
+//                    switch (ctx.arguments().length) {
+//                        case 1:
+//                            for (String note: noteManager.searchNotes(chatID, arguments.get(0), NoteManager.SearchType.NAME)){
+//                                silent.send(note, chatID);
+//                            }
+//                            break;
+//                        case 2:
+//                            switch (arguments.get(0)) {
+//                                case "content":
+//                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.CONTENT)){
+//                                        silent.send(note, chatID);
+//                                    }
+//                                    break;
+//                                case "notename":
+//                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.NAME)) {
+//                                        silent.send(note, chatID);
+//                                    }
+//                                    break;
+//                                case "tag":
+//                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.TAG)){
+//                                        silent.send(note, chatID);
+//                                    }
+//                                    break;
+//                                default:
+//                                    silent.send("I don't understand", chatID);
+//                                    break;
+//                            }
+//                            break;
+//                        default:
+//                            silent.send("I don't understand", chatID);
+//                            break;
+//                    }
+//                })
+//                .build();
+//    }
 
     public Ability editNote() {
         String replyMessageNoteName = "Input edit name";
@@ -220,19 +267,19 @@ public class BotAbilities implements AbilityExtension {
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .action(ctx -> {
-                    silent.forceReply(replyMessageNoteName,ctx.chatId());
+                    silent.forceReply(replyMessageNoteName, ctx.chatId());
                 })
-                .reply(upd->{
-                    noteName[0] = upd.getMessage().getText();
-                    silent.forceReply(replyMessageNewContent, upd.getMessage().getChatId());
-                },
-                    MESSAGE,
-                    REPLY,
-                    isReplyToBot(),
-                    isReplyToMessage(replyMessageNoteName))
-                .reply(upd ->{
-                    silent.send(noteManager.editNoteContent(upd.getMessage().getChatId(), noteName[0], upd.getMessage().getText()), upd.getMessage().getChatId());
-                },
+                .reply(upd -> {
+                            noteName[0] = upd.getMessage().getText();
+                            silent.forceReply(replyMessageNewContent, upd.getMessage().getChatId());
+                        },
+                        MESSAGE,
+                        REPLY,
+                        isReplyToBot(),
+                        isReplyToMessage(replyMessageNoteName))
+                .reply(upd -> {
+                            silent.send(noteManager.editNoteContent(upd.getMessage().getChatId(), noteName[0], upd.getMessage().getText()), upd.getMessage().getChatId());
+                        },
                         MESSAGE,
                         REPLY,
                         isReplyToBot(),
@@ -254,17 +301,17 @@ public class BotAbilities implements AbilityExtension {
                     silent.forceReply(replyMessageOldName, ctx.chatId());
                 })
                 .reply(upd -> {
-                    nameNote[0] = upd.getMessage().getText();
-                    silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
-                },
+                            nameNote[0] = upd.getMessage().getText();
+                            silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
+                        },
                         MESSAGE,
                         REPLY,
                         isReplyToBot(),
                         isReplyToMessage(replyMessageOldName))
                 .reply(upd -> {
-                    Long chatID = upd.getMessage().getChatId();
-                    silent.send(noteManager.editNoteName(chatID, nameNote[0], upd.getMessage().getText()), chatID);
-                },
+                            Long chatID = upd.getMessage().getChatId();
+                            silent.send(noteManager.editNoteName(chatID, nameNote[0], upd.getMessage().getText()), chatID);
+                        },
                         MESSAGE,
                         REPLY,
                         isReplyToBot(),
@@ -286,17 +333,17 @@ public class BotAbilities implements AbilityExtension {
                     silent.forceReply(replyMessageOldName, ctx.chatId());
                 })
                 .reply(upd -> {
-                    nameFolder[0] = upd.getMessage().getText();
-                    silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
-                },
+                            nameFolder[0] = upd.getMessage().getText();
+                            silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
+                        },
                         MESSAGE,
                         REPLY,
                         isReplyToBot(),
                         isReplyToMessage(replyMessageOldName))
                 .reply(upd -> {
-                    Long chatID = upd.getMessage().getChatId();
-                    silent.send(noteManager.renameFolder(chatID, nameFolder[0], upd.getMessage().getText()), chatID);
-                },
+                            Long chatID = upd.getMessage().getChatId();
+                            silent.send(noteManager.renameFolder(chatID, nameFolder[0], upd.getMessage().getText()), chatID);
+                        },
                         MESSAGE,
                         REPLY,
                         isReplyToBot(),
@@ -370,13 +417,13 @@ public class BotAbilities implements AbilityExtension {
                         isReplyToBot(),
                         isReplyToMessage(replyMessageNewName))
                 .reply(upd -> {
-                    Long chatID = upd.getMessage().getChatId();
-                    String editedNote = noteManager.editNoteFolder(chatID, nameNote[0], upd.getMessage().getText());
-                    if (editedNote == null) {
-                        silent.send("no note found", chatID);
-                    }
-                    silent.send("note edited:\\n" + editedNote, chatID);
-                },
+                            Long chatID = upd.getMessage().getChatId();
+                            String editedNote = noteManager.editNoteFolder(chatID, nameNote[0], upd.getMessage().getText());
+                            if (editedNote == null) {
+                                silent.send("no note found", chatID);
+                            }
+                            silent.send("note edited:\\n" + editedNote, chatID);
+                        },
                         MESSAGE,
                         REPLY,
                         isReplyToBot(),
