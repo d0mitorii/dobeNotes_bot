@@ -177,15 +177,16 @@ public class DatabaseManager {
             return false;
         }
 
-
         String folder = getFolder(noteID);
         Set<AbstractMap.SimpleEntry<String, Set<UUID>>> folderSetWithNotes = getFolderSetWithNotes(userID);
         AbstractMap.SimpleEntry<Long, String> folderPair = new AbstractMap.SimpleEntry<>(userID, folder);
         Map<AbstractMap.SimpleEntry<Long, String>, Set<UUID>> folderToNotesMap = db.getMap(FOLDER_TO_NOTES);
         Set<UUID> noteSet = folderToNotesMap.get(folderPair);
+
         if (noteSet != null) {
             noteSet.remove(noteID);
         }
+
         if (noteSet == null || noteSet.isEmpty()) {
             deleteFolder(userID, folder);
         } else {
