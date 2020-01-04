@@ -117,6 +117,9 @@ public class DatabaseManager {
             if (oldNoteSet != null) {
                 oldNoteSet.remove(noteID);
                 folderToNotesMap.put(oldFolderPair, oldNoteSet);
+                if (oldNoteSet.isEmpty()) {
+                    deleteFolder(userID, oldFolder);
+                }
             }
         }
 
@@ -149,7 +152,6 @@ public class DatabaseManager {
         Map<Long, Set<String>> foldersMap = db.getMap(USERID_TO_FOLDERS);
         return foldersMap.get(userID);
     }
-
 
     public Set<AbstractMap.SimpleEntry<String, Set<UUID>>> getFolderSetWithNotes(Long userID) {
         Set<String> folderSet = getFolderSet(userID);
@@ -198,10 +200,9 @@ public class DatabaseManager {
             noteSet.remove(noteID);
         }
 
+        folderToNotesMap.put(folderPair, noteSet);
         if (noteSet == null || noteSet.isEmpty()) {
             deleteFolder(userID, folder);
-        } else {
-            folderToNotesMap.put(folderPair, noteSet);
         }
 
         Map<AbstractMap.SimpleEntry<String, Long>, UUID> noteIdMap = db.getMap(NOTENAME_TO_NOTEID);
@@ -222,10 +223,7 @@ public class DatabaseManager {
 
     public boolean deleteFolder(Long userID, String folder) {
         Set<String> folderSet = getFolderSet(userID);
-        if (folderSet == null) {
-            return false;
-        }
-        if (!folderSet.remove(folder)) {
+        if (folderSet == null || !folderSet.remove(folder)) {
             return false;
         }
 
@@ -274,11 +272,7 @@ public class DatabaseManager {
             folderToNotesMap.put(newFolderKey, new HashSet<>());
         }
 
-        if (deleteFolder(userID, oldFolderName)) {
-            return "success";
-        } else {
-            return "deletion error";
-        }
+        return "success";
     }
 
     public List<String> getNoteTags(UUID noteID) {

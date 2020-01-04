@@ -81,7 +81,7 @@ public class NoteManager{
     public List<String> listFolderNotes(Long userID, String folder) {
         Set<UUID> noteSet = dbManager.getFolderNotes(userID, folder);
         if (noteSet == null || noteSet.isEmpty()) {
-            return new ArrayList<>(Arrays.asList("this folder doesn't exist"));
+            return Collections.singletonList("this folder doesn't exist");
         }
 
         List<String> notes = new ArrayList<>();
@@ -135,9 +135,7 @@ public class NoteManager{
             case "collision":
                 return "a folder with this name already exists";
             case "success":
-                return oldFolderName + "->" + newFolderName + ": successfully renamed";
-            case "deletion error":
-                return "error deleting folder: " + oldFolderName;
+                return oldFolderName + " -> " + newFolderName + " : successfully renamed";
             default:
                 return "unexpected error";
         }
