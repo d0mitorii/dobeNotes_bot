@@ -3,6 +3,7 @@ package telegram_bot;
 import org.telegram.abilitybots.api.objects.MessageContext;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -32,9 +33,8 @@ public class Keyboards {
     public static SendMessage addReplyKeyboard(MessageContext ctx) {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         SendMessage sendMessage = new SendMessage();
-
         replyKeyboardMarkup.setOneTimeKeyboard(true);
-        replyKeyboardMarkup.getResizeKeyboard();
+        replyKeyboardMarkup.setResizeKeyboard(true);
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow keyboardRowFirst = new KeyboardRow();
