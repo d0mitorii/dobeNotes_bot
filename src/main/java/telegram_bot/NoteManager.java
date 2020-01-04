@@ -78,6 +78,19 @@ public class NoteManager{
         return noteName;
     }
 
+    public List<String> listFolderNotes(Long userID, String folder) {
+        Set<UUID> noteSet = dbManager.getFolderNotes(userID, folder);
+        if (noteSet == null || noteSet.isEmpty()) {
+            return new ArrayList<>(Arrays.asList("this folder doesn't exist"));
+        }
+
+        List<String> notes = new ArrayList<>();
+        for (UUID noteID : noteSet) {
+            notes.add(getNote(noteID));
+        }
+        return notes;
+    }
+
     public List<String> getNoteTags(UUID noteID) {
         return dbManager.getNoteTags(noteID);
     }
