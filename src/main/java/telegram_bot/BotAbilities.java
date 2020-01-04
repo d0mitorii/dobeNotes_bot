@@ -369,11 +369,7 @@ public class BotAbilities implements AbilityExtension {
                         isReplyToMessage(replyMessageOldName))
                 .reply(upd -> {
                             Long chatID = upd.getMessage().getChatId();
-                            String editedNote = noteManager.editNoteFolder(chatID, nameNote[0], upd.getMessage().getText());
-                            if (editedNote == null) {
-                                silent.send("no note found", chatID);
-                            }
-                            silent.send("note edited:\\n" + editedNote, chatID);
+                            silent.send(noteManager.editNoteFolder(chatID, nameNote[0], upd.getMessage().getText()), chatID);
                         },
                         MESSAGE,
                         REPLY,
