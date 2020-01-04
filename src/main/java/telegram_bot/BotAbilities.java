@@ -144,7 +144,7 @@ public class BotAbilities implements AbilityExtension {
         String replyMessage = "Input folder name";
         return Ability.builder()
                 .name("viewfolder")
-                .info("View all notes in folder")
+                .info("View all notes in a folder")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
@@ -169,7 +169,7 @@ public class BotAbilities implements AbilityExtension {
         String replyMessageSearchString = "Input what you're searching for";
         return Ability.builder()
                 .name("search")
-                .info("Search note")
+                .info("Search through your notes")
                 .privacy(PUBLIC)
                 .locality(ALL)
                 .input(0)
