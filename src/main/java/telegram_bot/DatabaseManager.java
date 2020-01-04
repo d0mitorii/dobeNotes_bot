@@ -132,7 +132,6 @@ public class DatabaseManager {
         noteSet.add(noteID);
         folderToNotesMap.put(folderPair, noteSet);
 
-
         db.commit();
     }
 
