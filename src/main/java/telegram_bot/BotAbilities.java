@@ -88,19 +88,17 @@ public class BotAbilities implements AbilityExtension {
 
                             switch (arguments.size()) {
                                 case 0:
-                                    noteManager.addNote(chatID, textNote);
+                                    silent.send(noteManager.addNote(chatID, textNote), chatID);
                                     break;
                                 case 1:
-                                    noteManager.addNote(chatID, textNote, arguments.get(0));
+                                    silent.send(noteManager.addNote(chatID, textNote, arguments.get(0)), chatID);
                                     break;
                                 case 2:
-                                    noteManager.addNote(chatID, textNote, arguments.get(0), arguments.get(1));
+                                    silent.send(noteManager.addNote(chatID, textNote, arguments.get(0), arguments.get(1)), chatID);
                                     break;
                                 default:
                                     silent.send("I don't understand", chatID);
                             }
-                            String text = "Note added:\n" + textNote;
-                            silent.send(text, chatID);
                         },
                         MESSAGE,
                         REPLY,
@@ -117,15 +115,9 @@ public class BotAbilities implements AbilityExtension {
                 .locality(ALL)
                 .input(0)
                 .action(ctx -> {
-
                     Long chatID = ctx.chatId();
-
-                    if (noteManager.listUserNotes(chatID) != null) {
-                        for (String note : noteManager.listUserNotes(chatID)) {
-                            silent.send(note, chatID);
-                        }
-                    } else {
-                        silent.send("You don't have any notes", chatID);
+                    for (String note : noteManager.listUserNotes(chatID)) {
+                        silent.send(note, chatID);
                     }
                 })
                 .build();
@@ -139,15 +131,9 @@ public class BotAbilities implements AbilityExtension {
                 .locality(ALL)
                 .input(0)
                 .action(ctx -> {
-
                     Long chatID = ctx.chatId();
-
-                    if (noteManager.listUserNotes(chatID) != null) {
-                        for (String folder : noteManager.listUserFolders(chatID)) {
-                            silent.send(folder, chatID);
-                        }
-                    } else {
-                        silent.send("You don't have any folders", chatID);
+                    for (String folder : noteManager.listUserFolders(chatID)) {
+                        silent.send(folder, chatID);
                     }
                 })
                 .build();
@@ -156,8 +142,6 @@ public class BotAbilities implements AbilityExtension {
     public Ability search() {
         String[] text = new String[2];
         boolean[] isAbleToSearch = new boolean[1];
-        isAbleToSearch[0] = false;
-        String replyMessageSearchType = "Input the search type";
         String replyMessageSearchString = "Input what you're searching for";
         return Ability.builder()
                 .name("search")
@@ -213,67 +197,10 @@ public class BotAbilities implements AbilityExtension {
                 .build();
     }
 
-//    public Ability search() {
-//        List<String> arguments = new ArrayList<>();
-//        return Ability.builder()
-//                .name("search")
-//                .info("<notename> <text>")
-//                .privacy(PUBLIC)
-//                .locality(ALL)
-//                .input(0)
-//                .action(ctx -> {
-//                    Long chatID = ctx.chatId();
-//                    arguments.clear();
-//
-//                    switch (ctx.arguments().length) {
-//                        case 1:
-//                            arguments.add(ctx.firstArg()); //имя заметки
-//                            break;
-//                        case 2:
-//                            arguments.add(ctx.firstArg()); // content/notename/tag
-//                            arguments.add(ctx.secondArg()); // text
-//                            break;
-//                    }
-//
-//                    switch (ctx.arguments().length) {
-//                        case 1:
-//                            for (String note: noteManager.searchNotes(chatID, arguments.get(0), NoteManager.SearchType.NAME)){
-//                                silent.send(note, chatID);
-//                            }
-//                            break;
-//                        case 2:
-//                            switch (arguments.get(0)) {
-//                                case "content":
-//                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.CONTENT)){
-//                                        silent.send(note, chatID);
-//                                    }
-//                                    break;
-//                                case "notename":
-//                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.NAME)) {
-//                                        silent.send(note, chatID);
-//                                    }
-//                                    break;
-//                                case "tag":
-//                                    for (String note: noteManager.searchNotes(chatID, arguments.get(1), NoteManager.SearchType.TAG)){
-//                                        silent.send(note, chatID);
-//                                    }
-//                                    break;
-//                                default:
-//                                    silent.send("I don't understand", chatID);
-//                                    break;
-//                            }
-//                            break;
-//                        default:
-//                            silent.send("I don't understand", chatID);
-//                            break;
-//                    }
-//                })
-//                .build();
-//    }
 
     public Ability editNote() {
-        String replyMessageNoteName = "Input edit name";
-        String replyMessageNewContent = "Input content";
+        String replyMessageNoteName = "Input the name of the note you want to edit";
+        String replyMessageNewContent = "Input new note content";
         String[] noteName = new String[1];
         return Ability.builder()
                 .name("editnote")
@@ -299,7 +226,7 @@ public class BotAbilities implements AbilityExtension {
     }
 
     public Ability editNoteName() {
-        String replyMessageOldName = "Input old note name";
+        String replyMessageOldName = "Input the name of the note you want to rename";
         String replyMessageNewName = "Input new note name";
         String[] nameNote = new String[1];
         return Ability.builder()
@@ -329,7 +256,7 @@ public class BotAbilities implements AbilityExtension {
     }
 
     public Ability editFolderName() {
-        String replyMessageOldName = "Input old folder name";
+        String replyMessageOldName = "Input the name of the folder you want to rename";
         String replyMessageNewName = "Input new folder name";
         String[] nameFolder = new String[1];
         return Ability.builder()
@@ -338,9 +265,7 @@ public class BotAbilities implements AbilityExtension {
                 .input(0)
                 .privacy(PUBLIC)
                 .locality(ALL)
-                .action(ctx -> {
-                    silent.forceReply(replyMessageOldName, ctx.chatId());
-                })
+                .action(ctx -> silent.forceReply(replyMessageOldName, ctx.chatId()))
                 .reply(upd -> {
                             nameFolder[0] = upd.getMessage().getText();
                             silent.forceReply(replyMessageNewName, upd.getMessage().getChatId());
@@ -361,7 +286,7 @@ public class BotAbilities implements AbilityExtension {
     }
 
     public Ability deleteNote() {
-        String replyMessage = "Input note name";
+        String replyMessage = "Input the name of the note you want to delete";
         return Ability.builder()
                 .name("deletenote")
                 .info("Delete note")
@@ -381,7 +306,7 @@ public class BotAbilities implements AbilityExtension {
     }
 
     public Ability deleteFolder() {
-        String replyMessage = "Input folder name";
+        String replyMessage = "Input the name of the folder you want to delete";
         return Ability.builder()
                 .name("deletefolder")
                 .info("Delete folder")
@@ -401,8 +326,8 @@ public class BotAbilities implements AbilityExtension {
     }
 
     public Ability changeFolder() {
-        String replyMessageOldName = "Input name note";
-        String replyMessageNewName = "Input name new folder";
+        String replyMessageOldName = "Input the name of the note you want to move";
+        String replyMessageNewName = "Input new folder";
         String[] nameNote = new String[1];
         return Ability.builder()
                 .name("change")
